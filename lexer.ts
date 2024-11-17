@@ -1,53 +1,65 @@
-import { Token, TokenList, TokenType } from "./token.ts";
+import { Token, TokenKind, TokenType, LookupIdent } from "./token.ts";
 
 
 export class Lexer {
-    input: string;
-    position: number;
-    readPosition: number;
-    ch: string;
+    input: string = "";
+    position: number = 0;
+    readPosition: number = 0;
+    ch: string = "";
 
     constructor(input: string) {
         this.input = input;
-        this.readChar();
+        this.ReadChar();
     }
 
-    nextToken(): Token {
+    NextToken(): Token {
         let tok: Token;
 
-        this.skipWhitespace();
+        this.SkipWhitespace();
 
         switch (this.ch) {
-            case '+':
-                tok = new Token(TokenList.PLUS, this.ch);
-                break;
-        
-            default:
-                if (isLetter(this.ch)) {
-                    const type_ = TokenList.FUNCTION;
-                    const literal = this.readIdentifier();
-                    tok = new Token(type_, literal);
-                } else if (isDigit(this.ch)) {
-                    const type_ = TokenList.INT;
-                    const literal = this.readNumber();
-                    tok = new Token(type_, literal);
-                } else {
-                    tok = new Token(TokenList.ILLEGAL, this.ch);
-                }
-                break;
+        case '=':
+            if (this.PeekChar() == '=') {
+                tok = new Token(TokenKind.EQ, this.ch);
+            } else {
+                tok = new Token(TokenKind.ASSIGN, this.ch);
+            }
+            break;
+        case '+':
+            tok = new Token(TokenKind.PLUS, this.ch);
+            break;
+        case ';':
+            tok = new Token(TokenKind.SEMICOLON, this.ch);
+            break;
+        default:
+            if (IsLetter(this.ch)) {
+                const literal = this.ReadIdentifier();
+                const type_ = LookupIdent(literal);
+                tok = new Token(type_, literal);
+                return tok;
+            } else if (IsDigit(this.ch)) {
+                const type_ = TokenKind.INT;
+                const literal = this.ReadNumber();
+                tok = new Token(type_, literal);
+                return tok;
+            } else {
+                tok = new Token(TokenKind.ILLEGAL, this.ch);
+            }
+            break;
         }
         
-        this.readChar();
+        this.ReadChar();
         return tok;
     }
 
-    skipWhitespace() {
-        while (this.ch in [' ', '\t', '\n', '\r']) {
-            this.readChar();
+    SkipWhitespace() {
+        const whitespace = /[\s\t\n\r]/;
+        while (this.ch.match(whitespace) != null) {
+            this.ReadChar();
         }
     }
 
-    readChar() {
+    ReadChar() {
         if (this.readPosition >= this.input.length) {
             this.ch = '';
         } else {
@@ -57,39 +69,45 @@ export class Lexer {
         this.readPosition++;
     }
 
-    peekChar(): string {
+    PeekChar(): string {
         if (this.readPosition >= this.input.length) {
             return '';
         } else {
             return this.input[this.readPosition];
         }
     }
+    
+    MakeTwoCharToken(): string {
+        const ch = this.ch;
+        this.ReadChar();
+        return ch + this.ch;
+    }
 
-    readIdentifier(): string {
+    ReadIdentifier(): string {
         const position = this.position;
-        while (isLetter(this.ch)) {
-            this.readChar();
+        while (IsLetter(this.ch)) {
+            this.ReadChar();
         }
         return this.input.slice(position, this.position);
     }
 
-    readNumber(): string {
+    ReadNumber(): string {
         const position = this.position;
-        while (isDigit(this.ch)) {
-            this.readChar();
+        while (IsDigit(this.ch)) {
+            this.ReadChar();
         }
         return this.input.slice(position, this.position);
     }
 }
 
-function isLetter(ch: string): boolean {
+function IsLetter(ch: string): boolean {
     return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_';
 }
 
-function isDigit(ch: string): boolean {
+function IsDigit(ch: string): boolean {
     return '0' <= ch && ch <= '9';
 }
 
-function newToken(tokenType: TokenType, ch: string): Token {
+function NewToken(tokenType: TokenType, ch: string): Token {
     return new Token(tokenType, ch);
 }

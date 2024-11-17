@@ -2,7 +2,7 @@
 
 export type TokenType = string;
 
-export class TokenList {
+export class TokenKind {
     static readonly ILLEGAL     = "ILLEGAL";
     static readonly EOF         = "EOF";
 
@@ -43,6 +43,16 @@ export class TokenList {
 	static readonly RETURN      = 'RETURN';
 }
 
+const Keywords = new Map([
+	["fn", TokenKind.FUNCTION],
+	["let", TokenKind.LET],
+	["true", TokenKind.TRUE],
+	["falus", TokenKind.FALSE],
+	["if", TokenKind.IF],
+	["else", TokenKind.ELSE],
+	["return", TokenKind.RETURN],
+]);
+
 export class Token {
     type_: TokenType;
     literal: string;
@@ -52,11 +62,19 @@ export class Token {
         this.literal = literal;
     }
     
-    setType(type_: TokenType) {
+    SetType(type_: TokenType) {
         this.type_ = type_;
     }
 
-    setLiteral(literal: string) {
+    SetLiteral(literal: string) {
         this.literal = literal;
     }
+}
+
+export function LookupIdent(ident: string): TokenType {
+	const tok = Keywords.get(ident);
+	if (tok != undefined) {
+		return tok;
+	}
+	return TokenKind.IDENT;
 }

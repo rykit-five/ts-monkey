@@ -7,8 +7,9 @@ export class TokenKind {
     static readonly EOF         = "EOF";
 
 	// Identifiers + literals
-	static readonly IDENT       = 'IDENT'; // add, foobar, x, y, ...
-	static readonly INT         = 'INT';   // 1343456
+	static readonly IDENT       = 'IDENT';  // add, foobar, x, y, ...
+	static readonly INT         = 'INT';    // 1343456
+	static readonly STRING		= "STRING"; // "foobar"
 
 	// Operators
 	static readonly ASSIGN      = '=';
@@ -27,11 +28,14 @@ export class TokenKind {
 	// Delimiters
 	static readonly COMMA       = ',';
 	static readonly SEMICOLON   = ';';
+	static readonly COLON		= ':';
 
 	static readonly LPAREN      = '(';
 	static readonly RPAREN      = ')';
 	static readonly LBRACE      = '{';
 	static readonly RBRACE      = '}';
+	static readonly LBRACKET    = '[';
+	static readonly RBRACKET    = ']';
 
 	// Keywords
 	static readonly FUNCTION    = 'FUNCTION';
@@ -47,7 +51,7 @@ const Keywords = new Map([
 	["fn", TokenKind.FUNCTION],
 	["let", TokenKind.LET],
 	["true", TokenKind.TRUE],
-	["falus", TokenKind.FALSE],
+	["false", TokenKind.FALSE],
 	["if", TokenKind.IF],
 	["else", TokenKind.ELSE],
 	["return", TokenKind.RETURN],

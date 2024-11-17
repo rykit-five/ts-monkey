@@ -20,7 +20,7 @@ export class Lexer {
         switch (this.ch) {
         case '=':
             if (this.PeekChar() == '=') {
-                tok = new Token(TokenKind.EQ, this.ch);
+                tok = new Token(TokenKind.EQ, this.MakeTwoCharToken());
             } else {
                 tok = new Token(TokenKind.ASSIGN, this.ch);
             }
@@ -28,8 +28,60 @@ export class Lexer {
         case '+':
             tok = new Token(TokenKind.PLUS, this.ch);
             break;
+        case '-':
+            tok = new Token(TokenKind.MINUS, this.ch);
+            break;
+        case '!':
+            if (this.PeekChar() == '=') {
+                tok = new Token(TokenKind.NOT_EQ, this.MakeTwoCharToken());
+            } else {
+                tok = new Token(TokenKind.BANG, this.ch);
+            }
+            break;
+        case '/':
+            tok = new Token(TokenKind.SLASH, this.ch);
+            break;
+        case '*':
+            tok = new Token(TokenKind.ASTERISK, this.ch);
+            break;
+        case '<':
+            tok = new Token(TokenKind.LT, this.ch);
+            break;
+        case '>':
+            tok = new Token(TokenKind.GT, this.ch);
+            break;
         case ';':
             tok = new Token(TokenKind.SEMICOLON, this.ch);
+            break;
+        case ':':
+            tok = new Token(TokenKind.COLON, this.ch);
+            break;
+        case ',':
+            tok = new Token(TokenKind.COMMA, this.ch);
+            break;
+        case '{':
+            tok = new Token(TokenKind.LBRACE, this.ch);
+            break;
+        case '}':
+            tok = new Token(TokenKind.RBRACE, this.ch);
+            break;
+        case '(':
+            tok = new Token(TokenKind.LPAREN, this.ch);
+            break;
+        case ')':
+            tok = new Token(TokenKind.RPAREN, this.ch);
+            break;
+        case '"':
+            tok = new Token(TokenKind.STRING, this.ReadString());
+            break;
+        case '[':
+            tok = new Token(TokenKind.LBRACKET, this.ch);
+            break;
+        case ']':
+            tok = new Token(TokenKind.RBRACKET, this.ch);
+            break;
+        case '0':
+            tok = new Token(TokenKind.EOF, "");
             break;
         default:
             if (IsLetter(this.ch)) {
@@ -95,6 +147,18 @@ export class Lexer {
         const position = this.position;
         while (IsDigit(this.ch)) {
             this.ReadChar();
+        }
+        return this.input.slice(position, this.position);
+    }
+
+    ReadString(): string {
+        const position = this.position + 1;
+        const regex = /[\"0]/;
+        while (true) {
+            this.ReadChar();
+            if (this.ch.match(regex) != null) {
+                break;
+            }
         }
         return this.input.slice(position, this.position);
     }

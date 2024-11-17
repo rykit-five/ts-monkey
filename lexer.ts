@@ -41,6 +41,13 @@ export class Lexer {
         case '/':
             tok = new Token(TokenKind.SLASH, this.ch);
             break;
+        case '\\':
+            if (this.PeekChar() == '0') {
+                tok = new Token(TokenKind.TERMINAL, this.MakeTwoCharToken());
+            } else {
+                tok = new Token(TokenKind.BACKSLASH, this.ch);
+            }
+            break;
         case '*':
             tok = new Token(TokenKind.ASTERISK, this.ch);
             break;

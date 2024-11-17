@@ -18,12 +18,15 @@ export class TokenKind {
 	static readonly BANG        = '!';
 	static readonly ASTERISK    = '*';
 	static readonly SLASH       = '/';
+	static readonly BACKSLASH	= '\\';
 
 	static readonly LT          = '<';
 	static readonly GT          = '>';
 
 	static readonly EQ          = '==';
 	static readonly NOT_EQ      = '!=';
+
+	static readonly TERMINAL	= '\\0';
 
 	// Delimiters
 	static readonly COMMA       = ',';

@@ -29,6 +29,7 @@ Deno.test("next token test", () => {
     "foo bar"
     [1, 2];
     {"foo": "bar"}
+    \\0
     `;
 
     class Test {
@@ -128,7 +129,7 @@ Deno.test("next token test", () => {
 		new Test(TokenKind.COLON, ":"),
 		new Test(TokenKind.STRING, "bar"),
 		new Test(TokenKind.RBRACE, "}"),
-		new Test(TokenKind.EOF, ""),
+		new Test(TokenKind.TERMINAL, "\\0"),
     ];
 
     const l = new Lexer(input);

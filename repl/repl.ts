@@ -1,4 +1,4 @@
-import { Token, TokenKind } from "./token.ts";
+import { Token, TokenKind } from "../token/token.ts";
 import { Lexer } from "./lexer.ts";
 
 const PROMPT: string = ">> "

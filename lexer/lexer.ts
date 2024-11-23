@@ -1,4 +1,10 @@
-import { Token, TokenKind, TokenType, LookupIdent } from "./token.ts";
+import { Token, TokenKind, TokenType, LookupIdent } from "../token/token.ts";
+
+export function New(input: string): Lexer {
+    const l = new Lexer(input);
+    l.ReadChar();
+    return l;
+}
 
 
 export class Lexer {

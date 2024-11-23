@@ -1,35 +1,35 @@
 import { assertEquals } from "jsr:@std/assert";
-import { Token, TokenKind, TokenType } from "./token.ts";
+import { Token, TokenKind, TokenType } from "../token/token.ts";
 import { Lexer } from "./lexer.ts";
 
 
 Deno.test("next token test", () => {
     const input = `
-    let five = 5;
-    let ten = 10;
-    
-    let add = fn(x, y) {
-        x + y;
-    };
+let five = 5;
+let ten = 10;
 
-    let result = add(five, ten);
-    !-/*5;
-    5 < 10 > 5;
+let add = fn(x, y) {
+	x + y;
+};
 
-    if (5 < 10) {
-        return true;
-    } else {
-        return false;
-    }
+let result = add(five, ten);
+!-/*5;
+5 < 10 > 5;
 
-    10 == 10;
-    10 != 9;
+if (5 < 10) {
+	return true;
+} else {
+	return false;
+}
 
-    "foobar"
-    "foo bar"
-    [1, 2];
-    {"foo": "bar"}
-    \\0
+10 == 10;
+10 != 9;
+
+"foobar"
+"foo bar"
+[1, 2];
+{"foo": "bar"}
+\\0s
     `;
 
     class Test {

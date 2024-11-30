@@ -4,10 +4,12 @@ on: [push]
 
 jobs:
     test:
-        runs-on: macos-latest
+        runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@master
-            - uses: denoland/setup-deno@main
+            - name: Checkout code
+              uses: actions/checkout@v3
+            - name: Setup Deno
+              uses: denoland/setup-deno@v2
               with:
                   deno-version: "2.0.6"
             - name: Run fmt
@@ -18,10 +20,10 @@ jobs:
                   deno lint
             - name: Run type-check
               run: |
-                  deno check ./ast/* \
-                  deno check ./lexer/* \
-                  deno check ./parser/* \
-                  deno check ./repl/* \
+                  deno check ./ast/*
+                  deno check ./lexer/*
+                  deno check ./parser/*
+                  deno check ./repl/*
                   deno check ./token/*
             - name: Run tests
               run: |

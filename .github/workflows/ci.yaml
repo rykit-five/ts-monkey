@@ -12,7 +12,7 @@ jobs:
                   deno-version: "2.0.6"
             - name: Run fmt
               run: |
-                  deno fmt --check
+                  deno fmt --check --indent-width=4
             - name: Run lint
               run: |
                   deno lint

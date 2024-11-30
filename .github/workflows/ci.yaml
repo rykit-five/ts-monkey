@@ -19,7 +19,7 @@ jobs:
             - name: Run type-check
               run: |
                   deno check ./ast/* \
-                  deno check ./lexeer/* \
+                  deno check ./lexer/* \
                   deno check ./parser/* \
                   deno check ./repl/* \
                   deno check ./token/*

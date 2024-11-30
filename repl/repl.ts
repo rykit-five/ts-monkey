@@ -1,5 +1,5 @@
 import { Token, TokenKind } from "../token/token.ts";
-import { Lexer } from "./lexer.ts";
+import { Lexer } from "../lexer/lexer.ts";
 
 const PROMPT: string = ">> ";
 

@@ -25,6 +25,7 @@ jobs:
                   deno check ./parser/*
                   deno check ./repl/*
                   deno check ./token/*
+                  deno check ./main.ts
             - name: Run tests
               run: |
                   deno test -A

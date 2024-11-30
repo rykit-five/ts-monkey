@@ -1,9 +1,9 @@
 import { assert, assertEquals, assertThrows } from "jsr:@std/assert";
-import { LetStatement, Statement } from "../ast/ast.ts";
+import { LetStatement, ReturnStatement, Statement } from "../ast/ast.ts";
 import { Lexer } from "../lexer/lexer.ts";
 import { Parser, New } from "./parser.ts";
 
-Deno.test("TestLetStatements", () =>{
+Deno.test("TestLetStatements", () => {
     const input = `
 let x = 5;
 let y = 16;
@@ -55,6 +55,53 @@ let foobar = 838383;
     }
 });
 
+Deno.test("TestReturnStatements", () => {
+    const input = `
+return 5;
+return 16;
+return 838383;
+\\0
+    `;
+
+    const l = new Lexer(input);
+    const p = New(l);
+
+    const program = p.ParseProgram();
+    CheckParseErrors(p);
+    if (program == null) {
+        assertThrows(
+            () => {
+                throw new Error("ParseProgram() returned null");
+            },
+            Error,
+            "Panic!",
+        );
+    }
+    if (program.statements.length != 3) {
+        assertThrows(
+            () => {
+                throw new Error(`Program.statements does not contain 3 statements. got=${program.statements.length}`);
+            },
+            Error,
+            "Panic!",
+        );
+    }
+
+    class Test {
+        expectedIdentifier: string;
+
+        constructor(expectedIdentifier: string) {
+            this.expectedIdentifier = expectedIdentifier;
+        }
+    }
+
+    for (let i = 0; i < program.statements.length; i++) {
+        const returnStmt = program.statements[i];
+        assert(IsReturnStatement(returnStmt), `stmt not ReturnStatement. got=${typeof(returnStmt)}`);
+        assertEquals(returnStmt.TokenLiteral(), "return", `returnStmt.TokenLiteral not 'return', got ${returnStmt.TokenLiteral()}`);
+    }
+});
+
 function CheckParseErrors(p: Parser) {
     const errors = p.Errors();
     if (errors.length == 0) {
@@ -94,4 +141,8 @@ function TestLetStatement(s: Statement, name: string): boolean {
 
 function IsLetStatement(s: Statement): s is LetStatement {
     return s instanceof LetStatement;
+}
+
+function IsReturnStatement(s: Statement): s is ReturnStatement {
+    return s instanceof ReturnStatement;
 }

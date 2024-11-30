@@ -40,7 +40,28 @@ export class LetStatement implements LetStatement {
         this.token = token;
     }
 
-    StatementNode() {}
+    StatementNode(): void {}
+
+    TokenLiteral(): string {
+        return this.token.literal;
+    }
+
+    String(): string {
+        return "";
+    }
+}
+
+export interface ReturnStatement extends Statement {
+    token: Token;
+    returnValue: Expression;
+}
+
+export class ReturnStatement implements ReturnStatement {
+    constructor(token: Token) {
+        this.token = token;
+    }
+
+    StatementNode(): void {}
 
     TokenLiteral(): string {
         return this.token.literal;

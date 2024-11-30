@@ -36,7 +36,6 @@ export class Parser {
 
     ParseProgram(): Program {
         const program = new Program();
-        program.statements = [];
 
         while (this.curToken.type != TokenKind.TERMINAL) {
             const stmt = this.ParseStatement();

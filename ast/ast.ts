@@ -18,12 +18,26 @@ export interface Program {
 }
 
 export class Program implements Program {
+    constructor() {
+        this.statements = [];
+    }
+
     TokenLiteral(): string {
         if (this.statements.length > 0) {
             return this.statements[0].TokenLiteral();
         } else {
             return "";
         }
+    }
+
+    String(): string {
+        let out: Array<string> = [];
+
+        for (let i = 0; i < this.statements.length; i++) {
+            out.push(this.statements[i].String());
+        }
+
+        return out.join("");
     }
 }
 
@@ -45,7 +59,19 @@ export class LetStatement implements LetStatement {
     }
 
     String(): string {
-        return "";
+        let out: Array<string> = [];
+
+        out.push(this.TokenLiteral() + " ");
+        out.push(this.name.String());
+        out.push(" = ");
+
+        if (this.value != null) {
+            out.push(this.value.String());
+        }
+
+        out.push(";");
+
+        return out.join("");
     }
 }
 
@@ -66,14 +92,50 @@ export class ReturnStatement implements ReturnStatement {
     }
 
     String(): string {
+        let out: Array<string> = [];
+
+        out.push(this.TokenLiteral() + " ");
+
+        if (this.returnValue != null) {
+            out.push(this.returnValue.String());
+        }
+
+        out.push(";");
+
+        return out.join("");
+    }
+}
+
+export interface ExpressionStatement {
+    token: Token;
+    expression: Expression;
+}
+
+export class ExpressionStatement implements ExpressionStatement {
+    constructor(token: Token) {
+        this.token = token;
+    }
+
+    StatementNode(): void {}
+
+    TokenLiteral(): string {
+        return this.token.literal;
+    }
+
+    String(): string {
+        if (this.expression != null) {
+            return this.expression.String();
+        }
         return "";
     }
 }
 
-export class Identifier {
+export interface Identifier {
     token: Token;
     value: string;
+}
 
+export class Identifier implements Identifier {
     constructor(token: Token, value: string) {
         this.token = token;
         this.value = value;
@@ -84,20 +146,8 @@ export class Identifier {
     TokenLiteral(): string {
         return this.token.literal;
     }
-}
 
-export class ExpressionStatement {
-    token: Token;
-    expression: Expression;
-
-    constructor(token: Token, expression: Expression) {
-        this.token = token;
-        this.expression = expression;
-    }
-
-    StatementNode() {}
-
-    TokenLiteral(): string {
-        return this.token.literal;
+    String(): string {
+        return this.value;
     }
 }

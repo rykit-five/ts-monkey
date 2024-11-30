@@ -1,0 +1,28 @@
+name: ci
+
+on: [push]
+
+jobs:
+    test:
+        runs-on: macos-latest
+        steps:
+            - uses: actions/checkout@master
+            - uses: denoland/setup-deno@main
+              with:
+                  deno-version: "2.0.6"
+            - name: Run fmt
+              run: |
+                  deno fmt --check
+            - name: Run lint
+              run: |
+                  deno lint
+            - name: Run type-check
+              run: |
+                  deno check ./ast/* \
+                  deno check ./lexeer/* \
+                  deno check ./parser/* \
+                  deno check ./repl/* \
+                  deno check ./token/*
+            - name: Run tests
+              run: |
+                  deno test -A

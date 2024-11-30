@@ -1,11 +1,10 @@
-import { Token, TokenKind, TokenType, LookupIdent } from "../token/token.ts";
+import { LookupIdent, Token, TokenKind } from "../token/token.ts";
 
 export function New(input: string): Lexer {
     const l = new Lexer(input);
     l.ReadChar();
     return l;
 }
-
 
 export class Lexer {
     input: string = "";
@@ -24,95 +23,98 @@ export class Lexer {
         this.SkipWhitespace();
 
         switch (this.ch) {
-        case '=':
-            if (this.PeekChar() == '=') {
-                tok = new Token(TokenKind.EQ, this.MakeTwoCharToken());
-            } else {
-                tok = new Token(TokenKind.ASSIGN, this.ch);
-            }
-            break;
-        case '+':
-            tok = new Token(TokenKind.PLUS, this.ch);
-            break;
-        case '-':
-            tok = new Token(TokenKind.MINUS, this.ch);
-            break;
-        case '!':
-            if (this.PeekChar() == '=') {
-                tok = new Token(TokenKind.NOT_EQ, this.MakeTwoCharToken());
-            } else {
-                tok = new Token(TokenKind.BANG, this.ch);
-            }
-            break;
-        case '/':
-            tok = new Token(TokenKind.SLASH, this.ch);
-            break;
-        case '\\':
-            if (this.PeekChar() == '0') {
-                tok = new Token(TokenKind.TERMINAL, this.MakeTwoCharToken());
-            } else {
-                tok = new Token(TokenKind.BACKSLASH, this.ch);
-            }
-            break;
-        case '*':
-            tok = new Token(TokenKind.ASTERISK, this.ch);
-            break;
-        case '<':
-            tok = new Token(TokenKind.LT, this.ch);
-            break;
-        case '>':
-            tok = new Token(TokenKind.GT, this.ch);
-            break;
-        case ';':
-            tok = new Token(TokenKind.SEMICOLON, this.ch);
-            break;
-        case ':':
-            tok = new Token(TokenKind.COLON, this.ch);
-            break;
-        case ',':
-            tok = new Token(TokenKind.COMMA, this.ch);
-            break;
-        case '{':
-            tok = new Token(TokenKind.LBRACE, this.ch);
-            break;
-        case '}':
-            tok = new Token(TokenKind.RBRACE, this.ch);
-            break;
-        case '(':
-            tok = new Token(TokenKind.LPAREN, this.ch);
-            break;
-        case ')':
-            tok = new Token(TokenKind.RPAREN, this.ch);
-            break;
-        case '"':
-            tok = new Token(TokenKind.STRING, this.ReadString());
-            break;
-        case '[':
-            tok = new Token(TokenKind.LBRACKET, this.ch);
-            break;
-        case ']':
-            tok = new Token(TokenKind.RBRACKET, this.ch);
-            break;
-        case '0':
-            tok = new Token(TokenKind.EOF, "");
-            break;
-        default:
-            if (IsLetter(this.ch)) {
-                const literal = this.ReadIdentifier();
-                const type = LookupIdent(literal);
-                tok = new Token(type, literal);
-                return tok;
-            } else if (IsDigit(this.ch)) {
-                const type = TokenKind.INT;
-                const literal = this.ReadNumber();
-                tok = new Token(type, literal);
-                return tok;
-            } else {
-                tok = new Token(TokenKind.ILLEGAL, this.ch);
-            }
-            break;
+            case "=":
+                if (this.PeekChar() == "=") {
+                    tok = new Token(TokenKind.EQ, this.MakeTwoCharToken());
+                } else {
+                    tok = new Token(TokenKind.ASSIGN, this.ch);
+                }
+                break;
+            case "+":
+                tok = new Token(TokenKind.PLUS, this.ch);
+                break;
+            case "-":
+                tok = new Token(TokenKind.MINUS, this.ch);
+                break;
+            case "!":
+                if (this.PeekChar() == "=") {
+                    tok = new Token(TokenKind.NOT_EQ, this.MakeTwoCharToken());
+                } else {
+                    tok = new Token(TokenKind.BANG, this.ch);
+                }
+                break;
+            case "/":
+                tok = new Token(TokenKind.SLASH, this.ch);
+                break;
+            case "\\":
+                if (this.PeekChar() == "0") {
+                    tok = new Token(
+                        TokenKind.TERMINAL,
+                        this.MakeTwoCharToken(),
+                    );
+                } else {
+                    tok = new Token(TokenKind.BACKSLASH, this.ch);
+                }
+                break;
+            case "*":
+                tok = new Token(TokenKind.ASTERISK, this.ch);
+                break;
+            case "<":
+                tok = new Token(TokenKind.LT, this.ch);
+                break;
+            case ">":
+                tok = new Token(TokenKind.GT, this.ch);
+                break;
+            case ";":
+                tok = new Token(TokenKind.SEMICOLON, this.ch);
+                break;
+            case ":":
+                tok = new Token(TokenKind.COLON, this.ch);
+                break;
+            case ",":
+                tok = new Token(TokenKind.COMMA, this.ch);
+                break;
+            case "{":
+                tok = new Token(TokenKind.LBRACE, this.ch);
+                break;
+            case "}":
+                tok = new Token(TokenKind.RBRACE, this.ch);
+                break;
+            case "(":
+                tok = new Token(TokenKind.LPAREN, this.ch);
+                break;
+            case ")":
+                tok = new Token(TokenKind.RPAREN, this.ch);
+                break;
+            case '"':
+                tok = new Token(TokenKind.STRING, this.ReadString());
+                break;
+            case "[":
+                tok = new Token(TokenKind.LBRACKET, this.ch);
+                break;
+            case "]":
+                tok = new Token(TokenKind.RBRACKET, this.ch);
+                break;
+            case "0":
+                tok = new Token(TokenKind.EOF, "");
+                break;
+            default:
+                if (IsLetter(this.ch)) {
+                    const literal = this.ReadIdentifier();
+                    const type = LookupIdent(literal);
+                    tok = new Token(type, literal);
+                    return tok;
+                } else if (IsDigit(this.ch)) {
+                    const type = TokenKind.INT;
+                    const literal = this.ReadNumber();
+                    tok = new Token(type, literal);
+                    return tok;
+                } else {
+                    tok = new Token(TokenKind.ILLEGAL, this.ch);
+                }
+                break;
         }
-        
+
         this.ReadChar();
         return tok;
     }
@@ -126,7 +128,7 @@ export class Lexer {
 
     ReadChar() {
         if (this.readPosition >= this.input.length) {
-            this.ch = '';
+            this.ch = "";
         } else {
             this.ch = this.input[this.readPosition];
         }
@@ -136,12 +138,12 @@ export class Lexer {
 
     PeekChar(): string {
         if (this.readPosition >= this.input.length) {
-            return '';
+            return "";
         } else {
             return this.input[this.readPosition];
         }
     }
-    
+
     MakeTwoCharToken(): string {
         const ch = this.ch;
         this.ReadChar();
@@ -178,13 +180,13 @@ export class Lexer {
 }
 
 function IsLetter(ch: string): boolean {
-    return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_';
+    return "a" <= ch && ch <= "z" || "A" <= ch && ch <= "Z" || ch == "_";
 }
 
 function IsDigit(ch: string): boolean {
-    return '0' <= ch && ch <= '9';
+    return "0" <= ch && ch <= "9";
 }
 
-function NewToken(tokenType: TokenType, ch: string): Token {
-    return new Token(tokenType, ch);
-}
+// function NewToken(tokenType: TokenType, ch: string): Token {
+//     return new Token(tokenType, ch);
+// }

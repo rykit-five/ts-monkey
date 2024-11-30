@@ -1,7 +1,7 @@
 import { assert, assertEquals, assertThrows } from "jsr:@std/assert";
 import { LetStatement, ReturnStatement, Statement } from "../ast/ast.ts";
 import { Lexer } from "../lexer/lexer.ts";
-import { Parser, New } from "./parser.ts";
+import { New, Parser } from "./parser.ts";
 
 Deno.test("TestLetStatements", () => {
     const input = `
@@ -28,7 +28,9 @@ let foobar = 838383;
     if (program.statements.length != 3) {
         assertThrows(
             () => {
-                throw new Error(`Program.statements does not contain 3 statements. got=${program.statements.length}`);
+                throw new Error(
+                    `Program.statements does not contain 3 statements. got=${program.statements.length}`,
+                );
             },
             Error,
             "Panic!",
@@ -80,25 +82,26 @@ return 838383;
     if (program.statements.length != 3) {
         assertThrows(
             () => {
-                throw new Error(`Program.statements does not contain 3 statements. got=${program.statements.length}`);
+                throw new Error(
+                    `Program.statements does not contain 3 statements. got=${program.statements.length}`,
+                );
             },
             Error,
             "Panic!",
         );
     }
 
-    class Test {
-        expectedIdentifier: string;
-
-        constructor(expectedIdentifier: string) {
-            this.expectedIdentifier = expectedIdentifier;
-        }
-    }
-
     for (let i = 0; i < program.statements.length; i++) {
         const returnStmt = program.statements[i];
-        assert(IsReturnStatement(returnStmt), `stmt not ReturnStatement. got=${typeof(returnStmt)}`);
-        assertEquals(returnStmt.TokenLiteral(), "return", `returnStmt.TokenLiteral not 'return', got ${returnStmt.TokenLiteral()}`);
+        assert(
+            IsReturnStatement(returnStmt),
+            `stmt not ReturnStatement. got=${typeof returnStmt}`,
+        );
+        assertEquals(
+            returnStmt.TokenLiteral(),
+            "return",
+            `returnStmt.TokenLiteral not 'return', got ${returnStmt.TokenLiteral()}`,
+        );
     }
 });
 
@@ -109,7 +112,7 @@ function CheckParseErrors(p: Parser) {
     }
 
     console.error(`paresr has ${errors.length}`);
-    for (var i = 0; i < errors.length; i++) {
+    for (let i = 0; i < errors.length; i++) {
         console.error(`parser error: ${p.errors[i]}`);
     }
     throw new Error();
@@ -122,7 +125,7 @@ function TestLetStatement(s: Statement, name: string): boolean {
     }
 
     if (!IsLetStatement(s)) {
-        console.error(`s not LetStatement. got=${typeof(s)}`);
+        console.error(`s not LetStatement. got=${typeof s}`);
         return false;
     }
 

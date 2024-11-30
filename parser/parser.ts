@@ -1,4 +1,10 @@
-import { Program, Statement, LetStatement, Identifier, ReturnStatement } from "../ast/ast.ts";
+import {
+    Identifier,
+    LetStatement,
+    Program,
+    ReturnStatement,
+    Statement,
+} from "../ast/ast.ts";
 import { Lexer } from "../lexer/lexer.ts";
 import { Token, TokenKind } from "../token/token.ts";
 
@@ -45,12 +51,12 @@ export class Parser {
 
     ParseStatement(): Statement | null {
         switch (this.curToken.type) {
-        case TokenKind.LET:
-            return this.ParseLetStatement();
-        case TokenKind.RETURN:
-            return this.ParseReturnStatement();
-        default:
-            return null;
+            case TokenKind.LET:
+                return this.ParseLetStatement();
+            case TokenKind.RETURN:
+                return this.ParseReturnStatement();
+            default:
+                return null;
         }
     }
 
@@ -107,7 +113,8 @@ export class Parser {
     }
 
     PeekError(t: TokenKind) {
-        const msg = `expected next token to be ${t}, got ${this.peekToken.type} instead`;
+        const msg =
+            `expected next token to be ${t}, got ${this.peekToken.type} instead`;
         this.errors.push(msg);
     }
 }

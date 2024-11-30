@@ -1,7 +1,7 @@
 import { Token, TokenKind } from "../token/token.ts";
 import { Lexer } from "./lexer.ts";
 
-const PROMPT: string = ">> "
+const PROMPT: string = ">> ";
 
 export async function start() {
     const decoder = new TextDecoder();
@@ -17,7 +17,11 @@ export async function start() {
 
         const l = new Lexer(line);
 
-        for (var tok: Token = l.NextToken(); tok.type != TokenKind.EOF; tok = l.NextToken()) {
+        for (
+            let tok: Token = l.NextToken();
+            tok.type != TokenKind.EOF;
+            tok = l.NextToken()
+        ) {
             // await Deno.stdout.write(tok);
             console.log(`{Type: ${tok.type} Literal: ${tok.literal}}`);
         }

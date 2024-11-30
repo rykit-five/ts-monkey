@@ -1,9 +1,8 @@
 import { Token } from "../token/token.ts";
 
-
 export interface Node {
     TokenLiteral(): string;
-	String(): string;
+    String(): string;
 }
 
 export interface Statement extends Node {
@@ -19,7 +18,6 @@ export interface Program {
 }
 
 export class Program implements Program {
-    
     TokenLiteral(): string {
         if (this.statements.length > 0) {
             return this.statements[0].TokenLiteral();

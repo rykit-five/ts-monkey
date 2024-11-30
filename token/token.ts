@@ -1,63 +1,61 @@
-
-
 export type TokenType = string;
 
 export class TokenKind {
-    static readonly ILLEGAL     = "ILLEGAL";
-    static readonly EOF         = "EOF";
+    static readonly ILLEGAL = "ILLEGAL";
+    static readonly EOF = "EOF";
 
-	// Identifiers + literals
-	static readonly IDENT       = 'IDENT';  // add, foobar, x, y, ...
-	static readonly INT         = 'INT';    // 1343456
-	static readonly STRING		= "STRING"; // "foobar"
+    // Identifiers + literals
+    static readonly IDENT = "IDENT"; // add, foobar, x, y, ...
+    static readonly INT = "INT"; // 1343456
+    static readonly STRING = "STRING"; // "foobar"
 
-	// Operators
-	static readonly ASSIGN      = '=';
-	static readonly PLUS        = '+';
-	static readonly MINUS       = '-';
-	static readonly BANG        = '!';
-	static readonly ASTERISK    = '*';
-	static readonly SLASH       = '/';
-	static readonly BACKSLASH	= '\\';
+    // Operators
+    static readonly ASSIGN = "=";
+    static readonly PLUS = "+";
+    static readonly MINUS = "-";
+    static readonly BANG = "!";
+    static readonly ASTERISK = "*";
+    static readonly SLASH = "/";
+    static readonly BACKSLASH = "\\";
 
-	static readonly LT          = '<';
-	static readonly GT          = '>';
+    static readonly LT = "<";
+    static readonly GT = ">";
 
-	static readonly EQ          = '==';
-	static readonly NOT_EQ      = '!=';
+    static readonly EQ = "==";
+    static readonly NOT_EQ = "!=";
 
-	static readonly TERMINAL	= '\\0';
+    static readonly TERMINAL = "\\0";
 
-	// Delimiters
-	static readonly COMMA       = ',';
-	static readonly SEMICOLON   = ';';
-	static readonly COLON		= ':';
+    // Delimiters
+    static readonly COMMA = ",";
+    static readonly SEMICOLON = ";";
+    static readonly COLON = ":";
 
-	static readonly LPAREN      = '(';
-	static readonly RPAREN      = ')';
-	static readonly LBRACE      = '{';
-	static readonly RBRACE      = '}';
-	static readonly LBRACKET    = '[';
-	static readonly RBRACKET    = ']';
+    static readonly LPAREN = "(";
+    static readonly RPAREN = ")";
+    static readonly LBRACE = "{";
+    static readonly RBRACE = "}";
+    static readonly LBRACKET = "[";
+    static readonly RBRACKET = "]";
 
-	// Keywords
-	static readonly FUNCTION    = 'FUNCTION';
-	static readonly LET         = 'LET';
-	static readonly TRUE        = 'TRUE';
-	static readonly FALSE       = 'FALSE';
-	static readonly IF          = 'IF';
-	static readonly ELSE        = 'ELSE';
-	static readonly RETURN      = 'RETURN';
+    // Keywords
+    static readonly FUNCTION = "FUNCTION";
+    static readonly LET = "LET";
+    static readonly TRUE = "TRUE";
+    static readonly FALSE = "FALSE";
+    static readonly IF = "IF";
+    static readonly ELSE = "ELSE";
+    static readonly RETURN = "RETURN";
 }
 
 const Keywords = new Map([
-	["fn", TokenKind.FUNCTION],
-	["let", TokenKind.LET],
-	["true", TokenKind.TRUE],
-	["false", TokenKind.FALSE],
-	["if", TokenKind.IF],
-	["else", TokenKind.ELSE],
-	["return", TokenKind.RETURN],
+    ["fn", TokenKind.FUNCTION],
+    ["let", TokenKind.LET],
+    ["true", TokenKind.TRUE],
+    ["false", TokenKind.FALSE],
+    ["if", TokenKind.IF],
+    ["else", TokenKind.ELSE],
+    ["return", TokenKind.RETURN],
 ]);
 
 export class Token {
@@ -68,7 +66,7 @@ export class Token {
         this.type = type;
         this.literal = literal;
     }
-    
+
     SetType(type: TokenType) {
         this.type = type;
     }
@@ -79,9 +77,9 @@ export class Token {
 }
 
 export function LookupIdent(ident: string): TokenType {
-	const tok = Keywords.get(ident);
-	if (tok != undefined) {
-		return tok;
-	}
-	return TokenKind.IDENT;
+    const tok = Keywords.get(ident);
+    if (tok != undefined) {
+        return tok;
+    }
+    return TokenKind.IDENT;
 }

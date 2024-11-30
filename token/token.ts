@@ -61,16 +61,16 @@ const Keywords = new Map([
 ]);
 
 export class Token {
-    type_: TokenType;
+    type: TokenType;
     literal: string;
 
-    constructor(type_: TokenType, literal: string) {
-        this.type_ = type_;
+    constructor(type: TokenType, literal: string) {
+        this.type = type;
         this.literal = literal;
     }
     
-    SetType(type_: TokenType) {
-        this.type_ = type_;
+    SetType(type: TokenType) {
+        this.type = type;
     }
 
     SetLiteral(literal: string) {

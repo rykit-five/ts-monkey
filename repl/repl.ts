@@ -17,9 +17,9 @@ export async function start() {
 
         const l = new Lexer(line);
 
-        for (var tok: Token = l.NextToken(); tok.type_ != TokenKind.EOF; tok = l.NextToken()) {
+        for (var tok: Token = l.NextToken(); tok.type != TokenKind.EOF; tok = l.NextToken()) {
             // await Deno.stdout.write(tok);
-            console.log(`{Type: ${tok.type_} Literal: ${tok.literal}}`);
+            console.log(`{Type: ${tok.type} Literal: ${tok.literal}}`);
         }
     }
 }

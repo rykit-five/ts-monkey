@@ -1,4 +1,4 @@
-import { Program } from "../ast/ast.ts";
+import { Program, Statement, LetStatement, Identifier } from "../ast/ast.ts";
 import { Lexer } from "../lexer/lexer.ts";
 import { Token, TokenKind } from "../token/token.ts";
 
@@ -27,6 +27,63 @@ export class Parser {
     }
 
     ParseProgram(): Program {
-        return new Program();
+        const program = new Program();
+        program.statements = [];
+
+        while (this.curToken.type != TokenKind.TERMINAL) {
+            const stmt = this.ParseStatement();
+            if (stmt != null) {
+                program.statements.push(stmt);
+            }
+            this.NextToken();
+        }
+
+        return program;
+    }
+
+    ParseStatement(): Statement | null {
+        switch (this.curToken.type) {
+        case TokenKind.LET:
+            return this.ParseLetStatement();
+        default:
+            return null;
+        }
+    }
+
+    ParseLetStatement(): LetStatement | null {
+        const stmt = new LetStatement(this.curToken);
+
+        if (!this.ExpectPeek(TokenKind.IDENT)) {
+            return null;
+        }
+
+        stmt.name = new Identifier(this.curToken, this.curToken.literal);
+
+        if (!this.ExpectPeek(TokenKind.ASSIGN)) {
+            return null;
+        }
+
+        while (!this.CurTokenIs(TokenKind.SEMICOLON)) {
+            this.NextToken();
+        }
+
+        return stmt;
+    }
+
+    CurTokenIs(t: TokenKind): boolean {
+        return this.curToken.type == t;
+    }
+
+    PeekTokenIs(t: TokenKind): boolean {
+        return this.peekToken.type == t;
+    }
+
+    ExpectPeek(t: TokenKind): boolean {
+        if (this.PeekTokenIs(t)) {
+            this.NextToken();
+            return true;
+        } else {
+            return false;
+        }
     }
 }

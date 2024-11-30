@@ -8,6 +8,7 @@ Deno.test("TestLetStatements", () =>{
 let x = 5;
 let y = 16;
 let foobar = 838383;
+\\0
     `;
 
     const l = new Lexer(input);
@@ -41,7 +42,7 @@ let foobar = 838383;
         }
     }
 
-    const tests: Test[] = [
+    const tests: Array<Test> = [
         new Test("x"),
         new Test("y"),
         new Test("foobar"),

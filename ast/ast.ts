@@ -15,7 +15,7 @@ export interface Expression extends Node {
 }
 
 export interface Program {
-    statements: Statement[];
+    statements: Array<Statement>;
 }
 
 export class Program implements Program {
@@ -36,10 +36,8 @@ export interface LetStatement extends Statement {
 }
 
 export class LetStatement implements LetStatement {
-    constructor(token: Token, name: Identifier, value: Expression) {
+    constructor(token: Token) {
         this.token = token;
-        this.name = name;
-        this.value = value;
     }
 
     StatementNode() {}

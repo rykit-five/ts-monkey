@@ -8,7 +8,7 @@
             "request": "launch",
             "name": "Launch Program",
             "type": "node",
-            "program": "${workspaceFolder}/lexer_test.ts",
+            "program": "${workspaceFolder}/parser/parser_test.ts",
             "cwd": "${workspaceFolder}",
             "env": {},
             "runtimeExecutable": "/opt/homebrew/bin/deno",

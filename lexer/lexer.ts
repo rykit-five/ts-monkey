@@ -99,13 +99,13 @@ export class Lexer {
         default:
             if (IsLetter(this.ch)) {
                 const literal = this.ReadIdentifier();
-                const type_ = LookupIdent(literal);
-                tok = new Token(type_, literal);
+                const type = LookupIdent(literal);
+                tok = new Token(type, literal);
                 return tok;
             } else if (IsDigit(this.ch)) {
-                const type_ = TokenKind.INT;
+                const type = TokenKind.INT;
                 const literal = this.ReadNumber();
-                tok = new Token(type_, literal);
+                tok = new Token(type, literal);
                 return tok;
             } else {
                 tok = new Token(TokenKind.ILLEGAL, this.ch);

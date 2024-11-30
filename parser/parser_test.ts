@@ -1,5 +1,12 @@
 import { assert, assertEquals, assertThrows } from "jsr:@std/assert";
-import { LetStatement, ReturnStatement, Statement } from "../ast/ast.ts";
+import {
+    Expression,
+    ExpressionStatement,
+    Identifier,
+    LetStatement,
+    ReturnStatement,
+    Statement,
+} from "../ast/ast.ts";
 import { Lexer } from "../lexer/lexer.ts";
 import { New, Parser } from "./parser.ts";
 
@@ -105,6 +112,54 @@ return 838383;
     }
 });
 
+Deno.test("TestIdentifierExpression", () => {
+    const input = "foobar;\\0";
+
+    const l = new Lexer(input);
+    const p = New(l);
+
+    const program = p.ParseProgram();
+    CheckParseErrors(p);
+
+    if (program.statements.length != 1) {
+        assertThrows(
+            () => {
+                throw new Error(
+                    `Program.statements does not contain 1 statements. got=${program.statements.length}`,
+                );
+            },
+            Error,
+            "Panic!",
+        );
+    }
+
+    assert(
+        IsExpressionStatement(program.statements[0]),
+        `program.statements[0] not ExpressionStatement. got=${
+            program.statements[0]
+        }`,
+    );
+    const stmt = program.statements[0];
+
+    assert(
+        IsIdentifier(stmt.expression),
+        `exp not Identifier. got=${stmt.expression}`,
+    );
+    const ident = stmt.expression;
+
+    assertEquals(
+        ident.value,
+        "foobar",
+        `ident.value not foobar. got=${ident.value}`,
+    );
+
+    assertEquals(
+        ident.TokenLiteral(),
+        "foobar",
+        `ident.TokenLiteral() not foobar. got=${ident.TokenLiteral()}`,
+    );
+});
+
 function CheckParseErrors(p: Parser) {
     const errors = p.Errors();
     if (errors.length == 0) {
@@ -148,4 +203,12 @@ function IsLetStatement(s: Statement): s is LetStatement {
 
 function IsReturnStatement(s: Statement): s is ReturnStatement {
     return s instanceof ReturnStatement;
+}
+
+function IsExpressionStatement(s: Statement): s is ExpressionStatement {
+    return s instanceof ExpressionStatement;
+}
+
+function IsIdentifier(e: Expression | null): e is Identifier {
+    return e instanceof Identifier;
 }

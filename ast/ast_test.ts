@@ -1,4 +1,4 @@
-import { assert, assertEquals } from "jsr:@std/assert";
+import { assertEquals } from "jsr:@std/assert";
 import { Identifier, LetStatement, Program } from "./ast.ts";
 import { Token, TokenKind } from "../token/token.ts";
 

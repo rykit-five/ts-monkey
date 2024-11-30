@@ -1,4 +1,6 @@
 import {
+    Expression,
+    ExpressionStatement,
     Identifier,
     LetStatement,
     Program,
@@ -8,21 +10,48 @@ import {
 import { Lexer } from "../lexer/lexer.ts";
 import { Token, TokenKind } from "../token/token.ts";
 
+type PrefixParseFn = () => Expression;
+type InfixParseFn = () => Expression;
+
+enum Precedence {
+    LOWEST = 1,
+    EQUALS,
+    LESSGREATER,
+    SUM,
+    PRODUCT,
+    PREFIX,
+    CALL,
+}
+
 export function New(lexer: Lexer): Parser {
-    return new Parser(lexer);
+    const p = new Parser(lexer);
+
+    // どちらでもよい
+    // p.prefixParseFns.set(TokenKind.IDENT, p.ParseIdentifier.bind(p));
+    p.prefixParseFns.set(TokenKind.IDENT, () => p.ParseIdentifier());
+
+    return p;
 }
 
 export class Parser {
     l: Lexer;
+    errors: Array<string>;
+
     curToken: Token;
     peekToken: Token;
-    errors: Array<string>;
+
+    prefixParseFns: Map<TokenKind, PrefixParseFn>;
+    infixParseFns: Map<TokenKind, InfixParseFn>;
 
     constructor(l: Lexer) {
         this.l = l;
+        this.errors = [];
+
         this.curToken = new Token("", "");
         this.peekToken = new Token("", "");
-        this.errors = [];
+
+        this.prefixParseFns = new Map<TokenKind, PrefixParseFn>();
+        this.infixParseFns = new Map<TokenKind, InfixParseFn>();
 
         // Read two tokens, so curToken and peekToken are both set
         this.NextToken();
@@ -55,7 +84,7 @@ export class Parser {
             case TokenKind.RETURN:
                 return this.ParseReturnStatement();
             default:
-                return null;
+                return this.ParseExpressionStatement();
         }
     }
 
@@ -87,6 +116,36 @@ export class Parser {
         }
 
         return stmt;
+    }
+
+    ParseExpressionStatement(): ExpressionStatement | null {
+        const stmt = new ExpressionStatement(this.curToken);
+
+        stmt.expression = this.ParseExpression(Precedence.LOWEST);
+
+        // 5 + 4 のような式文を可能とするためにセミコロンは省略可能とする
+        if (this.PeekTokenIs(TokenKind.SEMICOLON)) {
+            this.NextToken();
+        }
+
+        return stmt;
+    }
+
+    ParseExpression(prec: Precedence): Expression | null {
+        let prefix: PrefixParseFn | undefined = undefined;
+        if (prec == Precedence.LOWEST) {
+            prefix = this.prefixParseFns.get(this.curToken.type);
+        }
+        if (prefix == undefined) {
+            return null;
+        }
+        const leftExp = prefix();
+
+        return leftExp;
+    }
+
+    ParseIdentifier(): Expression {
+        return new Identifier(this.curToken, this.curToken.literal);
     }
 
     CurTokenIs(t: TokenKind): boolean {

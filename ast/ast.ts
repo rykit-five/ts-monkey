@@ -31,7 +31,7 @@ export class Program implements Program {
     }
 
     String(): string {
-        let out: Array<string> = [];
+        const out: Array<string> = [];
 
         for (let i = 0; i < this.statements.length; i++) {
             out.push(this.statements[i].String());
@@ -59,7 +59,7 @@ export class LetStatement implements LetStatement {
     }
 
     String(): string {
-        let out: Array<string> = [];
+        const out: Array<string> = [];
 
         out.push(this.TokenLiteral() + " ");
         out.push(this.name.String());
@@ -92,7 +92,7 @@ export class ReturnStatement implements ReturnStatement {
     }
 
     String(): string {
-        let out: Array<string> = [];
+        const out: Array<string> = [];
 
         out.push(this.TokenLiteral() + " ");
 
@@ -106,9 +106,9 @@ export class ReturnStatement implements ReturnStatement {
     }
 }
 
-export interface ExpressionStatement {
+export interface ExpressionStatement extends Statement {
     token: Token;
-    expression: Expression;
+    expression: Expression | null;
 }
 
 export class ExpressionStatement implements ExpressionStatement {
@@ -130,7 +130,7 @@ export class ExpressionStatement implements ExpressionStatement {
     }
 }
 
-export interface Identifier {
+export interface Identifier extends Expression {
     token: Token;
     value: string;
 }

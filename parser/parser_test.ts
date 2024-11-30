@@ -15,6 +15,7 @@ let foobar = 838383;
     const p = New(l);
 
     const program = p.ParseProgram();
+    CheckParseErrors(p);
     if (program == null) {
         assertThrows(
             () => {
@@ -53,6 +54,19 @@ let foobar = 838383;
         assert(TestLetStatement(stmt, tests[i].expectedIdentifier));
     }
 });
+
+function CheckParseErrors(p: Parser) {
+    const errors = p.Errors();
+    if (errors.length == 0) {
+        return;
+    }
+
+    console.error(`paresr has ${errors.length}`);
+    for (var i = 0; i < errors.length; i++) {
+        console.error(`parser error: ${p.errors[i]}`);
+    }
+    throw new Error();
+}
 
 function TestLetStatement(s: Statement, name: string): boolean {
     if (s.TokenLiteral() != "let") {

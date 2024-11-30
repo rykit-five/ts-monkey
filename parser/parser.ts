@@ -10,11 +10,13 @@ export class Parser {
     l: Lexer;
     curToken: Token;
     peekToken: Token;
+    errors: Array<string>;
 
     constructor(l: Lexer) {
         this.l = l;
         this.curToken = new Token("", "");
         this.peekToken = new Token("", "");
+        this.errors = [];
 
         // Read two tokens, so curToken and peekToken are both set
         this.NextToken();
@@ -83,7 +85,17 @@ export class Parser {
             this.NextToken();
             return true;
         } else {
+            this.PeekError(t);
             return false;
         }
+    }
+
+    Errors(): string[] {
+        return this.errors;
+    }
+
+    PeekError(t: TokenKind) {
+        const msg = `expected next token to be ${t}, got ${this.peekToken.type} instead`;
+        this.errors.push(msg);
     }
 }

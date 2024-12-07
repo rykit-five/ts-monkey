@@ -1,61 +1,59 @@
-export type TokenType = string;
-
-export class TokenKind {
-    static readonly ILLEGAL = "ILLEGAL";
-    static readonly EOF = "EOF";
+export enum TokenType {
+    ILLEGAL = "ILLEGAL",
+    EOF = "EOF",
 
     // Identifiers + literals
-    static readonly IDENT = "IDENT"; // add, foobar, x, y, ...
-    static readonly INT = "INT"; // 1343456
-    static readonly STRING = "STRING"; // "foobar"
+    IDENT = "IDENT", // add, foobar, x, y, ...
+    INT = "INT", // 1343456
+    STRING = "STRING", // "foobar"
 
     // Operators
-    static readonly ASSIGN = "=";
-    static readonly PLUS = "+";
-    static readonly MINUS = "-";
-    static readonly BANG = "!";
-    static readonly ASTERISK = "*";
-    static readonly SLASH = "/";
-    static readonly BACKSLASH = "\\";
+    ASSIGN = "=",
+    PLUS = "+",
+    MINUS = "-",
+    BANG = "!",
+    ASTERISK = "*",
+    SLASH = "/",
+    BACKSLASH = "\\",
 
-    static readonly LT = "<";
-    static readonly GT = ">";
+    LT = "<",
+    GT = ">",
 
-    static readonly EQ = "==";
-    static readonly NOT_EQ = "!=";
+    EQ = "==",
+    NOT_EQ = "!=",
 
-    static readonly TERMINAL = "\\0";
+    TERMINAL = "\\0",
 
     // Delimiters
-    static readonly COMMA = ",";
-    static readonly SEMICOLON = ";";
-    static readonly COLON = ":";
+    COMMA = ",",
+    SEMICOLON = ",",
+    COLON = ":",
 
-    static readonly LPAREN = "(";
-    static readonly RPAREN = ")";
-    static readonly LBRACE = "{";
-    static readonly RBRACE = "}";
-    static readonly LBRACKET = "[";
-    static readonly RBRACKET = "]";
+    LPAREN = "(",
+    RPAREN = ")",
+    LBRACE = "{",
+    RBRACE = "}",
+    LBRACKET = "[",
+    RBRACKET = "]",
 
     // Keywords
-    static readonly FUNCTION = "FUNCTION";
-    static readonly LET = "LET";
-    static readonly TRUE = "TRUE";
-    static readonly FALSE = "FALSE";
-    static readonly IF = "IF";
-    static readonly ELSE = "ELSE";
-    static readonly RETURN = "RETURN";
+    FUNCTION = "FUNCTION",
+    LET = "LET",
+    TRUE = "TRUE",
+    FALSE = "FALSE",
+    IF = "IF",
+    ELSE = "ELSE",
+    RETURN = "RETURN",
 }
 
 const Keywords = new Map([
-    ["fn", TokenKind.FUNCTION],
-    ["let", TokenKind.LET],
-    ["true", TokenKind.TRUE],
-    ["false", TokenKind.FALSE],
-    ["if", TokenKind.IF],
-    ["else", TokenKind.ELSE],
-    ["return", TokenKind.RETURN],
+    ["fn", TokenType.FUNCTION],
+    ["let", TokenType.LET],
+    ["true", TokenType.TRUE],
+    ["false", TokenType.FALSE],
+    ["if", TokenType.IF],
+    ["else", TokenType.ELSE],
+    ["return", TokenType.RETURN],
 ]);
 
 export class Token {
@@ -81,5 +79,5 @@ export function LookupIdent(ident: string): TokenType {
     if (tok != undefined) {
         return tok;
     }
-    return TokenKind.IDENT;
+    return TokenType.IDENT;
 }

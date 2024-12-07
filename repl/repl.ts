@@ -1,4 +1,4 @@
-import { Token, TokenKind } from "../token/token.ts";
+import { Token, TokenType } from "../token/token.ts";
 import { Lexer } from "../lexer/lexer.ts";
 
 const PROMPT: string = ">> ";
@@ -19,7 +19,7 @@ export async function start() {
 
         for (
             let tok: Token = l.NextToken();
-            tok.type != TokenKind.EOF;
+            tok.type != TokenType.EOF;
             tok = l.NextToken()
         ) {
             // await Deno.stdout.write(tok);

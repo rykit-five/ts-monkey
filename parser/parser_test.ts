@@ -21,7 +21,7 @@ let foobar = 838383;
     const l = new Lexer(input);
     const p = New(l);
 
-    const program = p.ParseProgram();
+    const program = p.parseProgram();
     CheckParseErrors(p);
     if (program == null) {
         assertThrows(
@@ -75,7 +75,7 @@ return 838383;
     const l = new Lexer(input);
     const p = New(l);
 
-    const program = p.ParseProgram();
+    const program = p.parseProgram();
     CheckParseErrors(p);
     if (program == null) {
         assertThrows(
@@ -118,7 +118,7 @@ Deno.test("TestIdentifierExpression", () => {
     const l = new Lexer(input);
     const p = New(l);
 
-    const program = p.ParseProgram();
+    const program = p.parseProgram();
     CheckParseErrors(p);
 
     if (program.statements.length != 1) {

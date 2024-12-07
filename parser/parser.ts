@@ -8,10 +8,10 @@ import {
     Statement,
 } from "../ast/ast.ts";
 import { Lexer } from "../lexer/lexer.ts";
-import { Token, TokenKind } from "../token/token.ts";
+import { Token, TokenType } from "../token/token.ts";
 
-type PrefixParseFn = () => Expression;
-type InfixParseFn = () => Expression;
+type prefixParseFn = () => Expression;
+type infixParseFn = () => Expression;
 
 enum Precedence {
     LOWEST = 1,
@@ -27,8 +27,8 @@ export function New(lexer: Lexer): Parser {
     const p = new Parser(lexer);
 
     // どちらでもよい
-    // p.prefixParseFns.set(TokenKind.IDENT, p.ParseIdentifier.bind(p));
-    p.prefixParseFns.set(TokenKind.IDENT, () => p.ParseIdentifier());
+    p.registerPrefix(TokenType.IDENT, p.parseIdentifier.bind(p));
+    // p.registerPrefix(TokenType.IDENT, () => p.parseIdentifier());
 
     return p;
 }
@@ -40,99 +40,99 @@ export class Parser {
     curToken: Token;
     peekToken: Token;
 
-    prefixParseFns: Map<TokenKind, PrefixParseFn>;
-    infixParseFns: Map<TokenKind, InfixParseFn>;
+    prefixParseFns: Map<TokenType, prefixParseFn>;
+    infixParseFns: Map<TokenType, infixParseFn>;
 
     constructor(l: Lexer) {
         this.l = l;
         this.errors = [];
 
-        this.curToken = new Token("", "");
-        this.peekToken = new Token("", "");
+        this.curToken = new Token(TokenType.EOF, "");
+        this.peekToken = new Token(TokenType.EOF, "");
 
-        this.prefixParseFns = new Map<TokenKind, PrefixParseFn>();
-        this.infixParseFns = new Map<TokenKind, InfixParseFn>();
+        this.prefixParseFns = new Map<TokenType, prefixParseFn>();
+        this.infixParseFns = new Map<TokenType, infixParseFn>();
 
         // Read two tokens, so curToken and peekToken are both set
-        this.NextToken();
-        this.NextToken();
+        this.nextToken();
+        this.nextToken();
     }
 
-    NextToken() {
+    nextToken() {
         this.curToken = this.peekToken;
         this.peekToken = this.l.NextToken();
     }
 
-    ParseProgram(): Program {
+    parseProgram(): Program {
         const program = new Program();
 
-        while (this.curToken.type != TokenKind.TERMINAL) {
-            const stmt = this.ParseStatement();
+        while (this.curToken.type != TokenType.TERMINAL) {
+            const stmt = this.parseStatement();
             if (stmt != null) {
                 program.statements.push(stmt);
             }
-            this.NextToken();
+            this.nextToken();
         }
 
         return program;
     }
 
-    ParseStatement(): Statement | null {
+    parseStatement(): Statement | null {
         switch (this.curToken.type) {
-            case TokenKind.LET:
-                return this.ParseLetStatement();
-            case TokenKind.RETURN:
-                return this.ParseReturnStatement();
+            case TokenType.LET:
+                return this.parseLetStatement();
+            case TokenType.RETURN:
+                return this.parseReturnStatement();
             default:
-                return this.ParseExpressionStatement();
+                return this.parseExpressionStatement();
         }
     }
 
-    ParseLetStatement(): LetStatement | null {
+    parseLetStatement(): LetStatement | null {
         const stmt = new LetStatement(this.curToken);
 
-        if (!this.ExpectPeek(TokenKind.IDENT)) {
+        if (!this.expectPeek(TokenType.IDENT)) {
             return null;
         }
 
         stmt.name = new Identifier(this.curToken, this.curToken.literal);
 
-        if (!this.ExpectPeek(TokenKind.ASSIGN)) {
+        if (!this.expectPeek(TokenType.ASSIGN)) {
             return null;
         }
 
-        while (!this.CurTokenIs(TokenKind.SEMICOLON)) {
-            this.NextToken();
+        while (!this.curTokenIs(TokenType.SEMICOLON)) {
+            this.nextToken();
         }
 
         return stmt;
     }
 
-    ParseReturnStatement(): ReturnStatement | null {
+    parseReturnStatement(): ReturnStatement | null {
         const stmt = new ReturnStatement(this.curToken);
 
-        while (!this.CurTokenIs(TokenKind.SEMICOLON)) {
-            this.NextToken();
+        while (!this.curTokenIs(TokenType.SEMICOLON)) {
+            this.nextToken();
         }
 
         return stmt;
     }
 
-    ParseExpressionStatement(): ExpressionStatement | null {
+    parseExpressionStatement(): ExpressionStatement | null {
         const stmt = new ExpressionStatement(this.curToken);
 
-        stmt.expression = this.ParseExpression(Precedence.LOWEST);
+        stmt.expression = this.parseExpression(Precedence.LOWEST);
 
         // 5 + 4 のような式文を可能とするためにセミコロンは省略可能とする
-        if (this.PeekTokenIs(TokenKind.SEMICOLON)) {
-            this.NextToken();
+        if (this.peekTokenIs(TokenType.SEMICOLON)) {
+            this.nextToken();
         }
 
         return stmt;
     }
 
-    ParseExpression(prec: Precedence): Expression | null {
-        let prefix: PrefixParseFn | undefined = undefined;
+    parseExpression(prec: Precedence): Expression | null {
+        let prefix: prefixParseFn | undefined = undefined;
         if (prec == Precedence.LOWEST) {
             prefix = this.prefixParseFns.get(this.curToken.type);
         }
@@ -144,24 +144,24 @@ export class Parser {
         return leftExp;
     }
 
-    ParseIdentifier(): Expression {
+    parseIdentifier(): Expression {
         return new Identifier(this.curToken, this.curToken.literal);
     }
 
-    CurTokenIs(t: TokenKind): boolean {
+    curTokenIs(t: TokenType): boolean {
         return this.curToken.type == t;
     }
 
-    PeekTokenIs(t: TokenKind): boolean {
+    peekTokenIs(t: TokenType): boolean {
         return this.peekToken.type == t;
     }
 
-    ExpectPeek(t: TokenKind): boolean {
-        if (this.PeekTokenIs(t)) {
-            this.NextToken();
+    expectPeek(t: TokenType): boolean {
+        if (this.peekTokenIs(t)) {
+            this.nextToken();
             return true;
         } else {
-            this.PeekError(t);
+            this.peekError(t);
             return false;
         }
     }
@@ -170,9 +170,17 @@ export class Parser {
         return this.errors;
     }
 
-    PeekError(t: TokenKind) {
+    peekError(t: TokenType) {
         const msg =
             `expected next token to be ${t}, got ${this.peekToken.type} instead`;
         this.errors.push(msg);
+    }
+
+    registerPrefix(tokenType: TokenType, fn: prefixParseFn) {
+        this.prefixParseFns.set(tokenType, fn);
+    }
+
+    registerInfix(tokenType: TokenType, fn: infixParseFn) {
+        this.infixParseFns.set(tokenType, fn);
     }
 }

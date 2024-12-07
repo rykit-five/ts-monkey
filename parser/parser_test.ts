@@ -1,11 +1,12 @@
 import { assert, assertEquals, assertThrows } from "jsr:@std/assert";
 import {
-    Expression,
-    ExpressionStatement,
-    Identifier,
+    Statement,
     LetStatement,
     ReturnStatement,
-    Statement,
+    ExpressionStatement,
+    Expression,
+    Identifier,
+    IntegerLiteral,
 } from "../ast/ast.ts";
 import { Lexer } from "../lexer/lexer.ts";
 import { New, Parser } from "./parser.ts";
@@ -160,6 +161,50 @@ Deno.test("TestIdentifierExpression", () => {
     );
 });
 
+Deno.test("TestIntegerLiteralExpressoin", () => {
+    const input = "5;\\0";
+
+    const l = new Lexer(input);
+    const p = New(l);
+
+    const program = p.parseProgram();
+    CheckParseErrors(p);
+
+    if (program.statements.length != 1) {
+        assertThrows(
+            () => {
+                throw new Error(
+                    `Program has not enough statements. got=${program.statements.length}`,
+                );
+            },
+            Error,
+            "Panic!",
+        );
+    }
+
+    assert(
+        IsExpressionStatement(program.statements[0]),
+        `program.statements[0] not ExpressionStatement. got=${
+            program.statements[0]
+        }`,
+    );
+    const stmt = program.statements[0];
+
+    assert(
+        IsIntegerLiteral(stmt.expression),
+        `exp not IntegerLiteral. got=${stmt.expression}`,
+    );
+    const literal = stmt.expression;
+
+    assertEquals(
+        literal.value,
+        5,
+        `literal.value not 5. got=${literal.value}`,
+    );
+
+    assertEquals(literal.TokenLiteral(), "5", `literal.TokenLiteral() not 5. got=${literal.TokenLiteral()}`);
+});
+
 function CheckParseErrors(p: Parser) {
     const errors = p.Errors();
     if (errors.length == 0) {
@@ -211,4 +256,8 @@ function IsExpressionStatement(s: Statement): s is ExpressionStatement {
 
 function IsIdentifier(e: Expression | null): e is Identifier {
     return e instanceof Identifier;
+}
+
+function IsIntegerLiteral(e: Expression | null): e is IntegerLiteral {
+    return e instanceof IntegerLiteral;
 }

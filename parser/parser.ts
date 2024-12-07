@@ -2,6 +2,7 @@ import {
     Expression,
     ExpressionStatement,
     Identifier,
+    IntegerLiteral,
     LetStatement,
     Program,
     ReturnStatement,
@@ -29,6 +30,7 @@ export function New(lexer: Lexer): Parser {
     // どちらでもよい
     p.registerPrefix(TokenType.IDENT, p.parseIdentifier.bind(p));
     // p.registerPrefix(TokenType.IDENT, () => p.parseIdentifier());
+    p.registerPrefix(TokenType.INT, p.parseIntgerLiteral.bind(p));
 
     return p;
 }
@@ -146,6 +148,20 @@ export class Parser {
 
     parseIdentifier(): Expression {
         return new Identifier(this.curToken, this.curToken.literal);
+    }
+
+    parseIntgerLiteral(): Expression {
+        const lit = new IntegerLiteral(this.curToken, 0);
+
+        const value = parseInt(this.curToken.literal);
+        if (Number.isNaN(value)) {
+            const msg = `could not parse ${this.curToken.literal} as integer`;
+            this.errors.push(msg);
+        }
+
+        lit.value = value;
+
+        return lit;
     }
 
     curTokenIs(t: TokenType): boolean {

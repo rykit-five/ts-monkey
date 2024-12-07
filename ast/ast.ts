@@ -141,7 +141,7 @@ export class Identifier implements Identifier {
         this.value = value;
     }
 
-    ExpressionNode() {}
+    ExpressionNode(): void {}
 
     TokenLiteral(): string {
         return this.token.literal;
@@ -149,5 +149,27 @@ export class Identifier implements Identifier {
 
     String(): string {
         return this.value;
+    }
+}
+
+export interface IntegerLiteral extends Expression {
+    token: Token;
+    value: number;
+}
+
+export class IntegerLiteral implements IntegerLiteral {
+    constructor(token: Token, value: number) {
+        this.token = token;
+        this.value = value;
+    }
+
+    ExpressionNode(): void {}
+
+    TokenLiteral(): string {
+        return this.token.literal;
+    }
+
+    String(): string {
+        return this.value.toString();
     }
 }

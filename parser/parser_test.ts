@@ -352,6 +352,148 @@ Deno.test("TestParsingInfixExpressions", () => {
     }
 });
 
+Deno.test("TestOperetorPrecedenceParsing", () => {
+    class Test {
+        input: string;
+        expected: string;
+
+        constructor(input: string, expected: string) {
+            this.input = input;
+            this.expected = expected;
+        }
+    }
+
+    const tests: Array<Test> = [
+        new Test(
+            "-a * b\\0",
+            "((-a) * b)",
+        ),
+        new Test(
+            "!-a\\0",
+            "(!(-a))",
+        ),
+        new Test(
+            "a + b + c\\0",
+            "((a + b) + c)",
+        ),
+        new Test(
+            "a + b - c\\0",
+            "((a + b) - c)",
+        ),
+        new Test(
+            "a * b * c\\0",
+            "((a * b) * c)",
+        ),
+        new Test(
+            "a * b / c\\0",
+            "((a * b) / c)",
+        ),
+        new Test(
+            "a + b / c\\0",
+            "(a + (b / c))",
+        ),
+        new Test(
+            "a * b + c\\0",
+            "((a * b) + c)",
+        ),
+        new Test(
+            "a + b * c + d / e - f\\0",
+            "(((a + (b * c)) + (d / e)) - f)",
+        ),
+        new Test(
+            "3 + 4; -5 * 5\\0",
+            "(3 + 4)((-5) * 5)",
+        ),
+        new Test(
+            "5 > 4 == 3 < 4\\0",
+            "((5 > 4) == (3 < 4))",
+        ),
+        new Test(
+            "5 < 4 != 3 > 4\\0",
+            "((5 < 4) != (3 > 4))",
+        ),
+        new Test(
+            "3 + 4 * 5 == 3 * 1 + 4 * 5\\0",
+            "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))",
+        ),
+        // new Test(
+        //     "true\\0",
+        //     "true",
+        // ),
+        // new Test(
+        //     "false\\0",
+        //     "false",
+        // ),
+        // new Test(
+        //     "3 > 5 == false\\0",
+        //     "((3 > 5) == false)",
+        // ),
+        // new Test(
+        //     "3 < 5 == true\\0",
+        //     "((3 < 5) == true)",
+        // ),
+        // new Test(
+        //     "1 + (2 + 3) + 4\\0",
+        //     "((1 + (2 + 3)) + 4)",
+        // ),
+        // new Test(
+        //     "(5 + 5) * 2\\0",
+        //     "((5 + 5) * 2)",
+        // ),
+        // new Test(
+        //     "2 / (5 + 5)\\0",
+        //     "(2 / (5 + 5))",
+        // ),
+        // new Test(
+        //     "(5 + 5) * 2 * (5 + 5)\\0",
+        //     "(((5 + 5) * 2) * (5 + 5))",
+        // ),
+        // new Test(
+        //     "-(5 + 5)\\0",
+        //     "(-(5 + 5))",
+        // ),
+        // new Test(
+        //     "!(true == true)\\0",
+        //     "(!(true == true))",
+        // ),
+        // new Test(
+        //     "a + add(b * c) + d\\0",
+        //     "((a + add((b * c))) + d)",
+        // ),
+        // new Test(
+        //     "add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))\\0",
+        //     "add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))",
+        // ),
+        // new Test(
+        //     "add(a + b + c * d / f + g)\\0",
+        //     "add((((a + b) + ((c * d) / f)) + g))",
+        // ),
+        // new Test(
+        //     "a * [1, 2, 3, 4][b * c] * d\\0",
+        //     "((a * ([1, 2, 3, 4][(b * c)])) * d)",
+        // ),
+        // new Test(
+        //     "add(a * b[2], b[1], 2 * [1, 2][1])\\0",
+        //     "add((a * (b[2])), (b[1]), (2 * ([1, 2][1])))",
+        // ),
+    ];
+
+    for (let i = 0; i < tests.length; i++) {
+        const l = new Lexer(tests[i].input);
+        const p = New(l);
+
+        const program = p.parseProgram();
+        CheckParseErrors(p);
+
+        const actual = program.String();
+        assertEquals(
+            actual,
+            tests[i].expected,
+            `expected=${tests[i].expected}, got=${actual}`,
+        );
+    }
+});
+
 function CheckParseErrors(p: Parser) {
     const errors = p.Errors();
     if (errors.length == 0) {

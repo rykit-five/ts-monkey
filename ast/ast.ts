@@ -222,8 +222,8 @@ export class InfixExpression implements InfixExpression {
 
     String(): string {
         if (this.left != null && this.right != null) {
-            return `${this.left.String()}${this.operator}${this.right.String()}`;
+            return `(${this.left.String()} ${this.operator} ${this.right.String()})`;
         }
-        return `(${this.operator})`;
+        return `( ${this.operator} )`;
     }
 }

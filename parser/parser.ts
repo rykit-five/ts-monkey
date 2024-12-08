@@ -4,6 +4,7 @@ import {
     Identifier,
     IntegerLiteral,
     LetStatement,
+    PrefixExpression,
     Program,
     ReturnStatement,
     Statement,
@@ -31,6 +32,8 @@ export function New(lexer: Lexer): Parser {
     p.registerPrefix(TokenType.IDENT, p.parseIdentifier.bind(p));
     // p.registerPrefix(TokenType.IDENT, () => p.parseIdentifier());
     p.registerPrefix(TokenType.INT, p.parseIntgerLiteral.bind(p));
+    p.registerPrefix(TokenType.BANG, p.parsePrefixExpression.bind(p));
+    p.registerPrefix(TokenType.MINUS, p.parsePrefixExpression.bind(p));
 
     return p;
 }
@@ -134,11 +137,9 @@ export class Parser {
     }
 
     parseExpression(prec: Precedence): Expression | null {
-        let prefix: prefixParseFn | undefined = undefined;
-        if (prec == Precedence.LOWEST) {
-            prefix = this.prefixParseFns.get(this.curToken.type);
-        }
+        const prefix = this.prefixParseFns.get(this.curToken.type);
         if (prefix == undefined) {
+            this.noPrefixParseFnError(this.curToken.type);
             return null;
         }
         const leftExp = prefix();
@@ -151,7 +152,7 @@ export class Parser {
     }
 
     parseIntgerLiteral(): Expression {
-        const lit = new IntegerLiteral(this.curToken, 0);
+        const lit = new IntegerLiteral(this.curToken);
 
         const value = parseInt(this.curToken.literal);
         if (Number.isNaN(value)) {
@@ -162,6 +163,19 @@ export class Parser {
         lit.value = value;
 
         return lit;
+    }
+
+    parsePrefixExpression(): Expression {
+        const expression = new PrefixExpression(
+            this.curToken,
+            this.curToken.literal,
+        );
+
+        this.nextToken();
+
+        expression.right = this.parseExpression(Precedence.PREFIX);
+
+        return expression;
     }
 
     curTokenIs(t: TokenType): boolean {
@@ -189,6 +203,11 @@ export class Parser {
     peekError(t: TokenType) {
         const msg =
             `expected next token to be ${t}, got ${this.peekToken.type} instead`;
+        this.errors.push(msg);
+    }
+
+    noPrefixParseFnError(t: TokenType) {
+        const msg = `no prefix parse function for ${t} found`;
         this.errors.push(msg);
     }
 

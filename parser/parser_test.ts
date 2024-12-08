@@ -1,12 +1,13 @@
 import { assert, assertEquals, assertThrows } from "jsr:@std/assert";
 import {
-    Statement,
-    LetStatement,
-    ReturnStatement,
-    ExpressionStatement,
     Expression,
+    ExpressionStatement,
     Identifier,
     IntegerLiteral,
+    LetStatement,
+    PrefixExpression,
+    ReturnStatement,
+    Statement,
 } from "../ast/ast.ts";
 import { Lexer } from "../lexer/lexer.ts";
 import { New, Parser } from "./parser.ts";
@@ -174,7 +175,7 @@ Deno.test("TestIntegerLiteralExpressoin", () => {
         assertThrows(
             () => {
                 throw new Error(
-                    `Program has not enough statements. got=${program.statements.length}`,
+                    `Program.statements does not contain 1 statements. got=${program.statements.length}`,
                 );
             },
             Error,
@@ -202,7 +203,74 @@ Deno.test("TestIntegerLiteralExpressoin", () => {
         `literal.value not 5. got=${literal.value}`,
     );
 
-    assertEquals(literal.TokenLiteral(), "5", `literal.TokenLiteral() not 5. got=${literal.TokenLiteral()}`);
+    assertEquals(
+        literal.TokenLiteral(),
+        "5",
+        `literal.TokenLiteral() not 5. got=${literal.TokenLiteral()}`,
+    );
+});
+
+Deno.test("TestParsingPrefixExpressions", () => {
+    class PrefixTest {
+        input: string;
+        operator: string;
+        integerValue: number;
+
+        constructor(input: string, operator: string, integerValue: number) {
+            this.input = input;
+            this.operator = operator;
+            this.integerValue = integerValue;
+        }
+    }
+
+    const prefixTests: PrefixTest[] = [
+        new PrefixTest("!5\\0", "!", 5),
+        new PrefixTest("-15\\0", "-", 15),
+    ];
+
+    for (let i = 0; i < prefixTests.length; i++) {
+        const l = new Lexer(prefixTests[i].input);
+        const p = New(l);
+
+        const program = p.parseProgram();
+        CheckParseErrors(p);
+
+        if (program.statements.length != 1) {
+            assertThrows(
+                () => {
+                    throw new Error(
+                        `Program.statements does not contain 1 statements. got=${program.statements.length}`,
+                    );
+                },
+                Error,
+                "Panic!",
+            );
+        }
+
+        assert(
+            IsExpressionStatement(program.statements[0]),
+            `program.statements[0] is not ExpressionStatement. got=${
+                program.statements[0]
+            }`,
+        );
+        const stmt = program.statements[0];
+
+        assert(
+            IsPrefixExpression(stmt.expression),
+            `stmt is not PrefixExpression. got=${typeof stmt.expression}`,
+        );
+        const exp = stmt.expression;
+
+        assertEquals(
+            exp.operator,
+            prefixTests[i].operator,
+            `exp.operator is not ${
+                prefixTests[i].operator
+            }. got=${exp.operator}`,
+        );
+
+        assert(TestIntegerLiteral(exp.right, prefixTests[i].integerValue));
+    }
 });
 
 function CheckParseErrors(p: Parser) {
@@ -242,6 +310,28 @@ function TestLetStatement(s: Statement, name: string): boolean {
     return true;
 }
 
+function TestIntegerLiteral(il: Expression | null, value: number): boolean {
+    if (!IsIntegerLiteral(il)) {
+        console.error(`il not IntegerLiteral. got=${typeof il}`);
+        return false;
+    }
+    const integ = il;
+
+    if (integ.value != value) {
+        console.error(`integ.value not ${value}. got=${integ.value}`);
+        return false;
+    }
+
+    if (integ.TokenLiteral() != value.toString()) {
+        console.error(
+            `integ.TokenLiteral not ${value}. got=${integ.TokenLiteral()}`,
+        );
+        return false;
+    }
+
+    return true;
+}
+
 function IsLetStatement(s: Statement): s is LetStatement {
     return s instanceof LetStatement;
 }
@@ -260,4 +350,8 @@ function IsIdentifier(e: Expression | null): e is Identifier {
 
 function IsIntegerLiteral(e: Expression | null): e is IntegerLiteral {
     return e instanceof IntegerLiteral;
+}
+
+function IsPrefixExpression(e: Expression | null): e is PrefixExpression {
+    return e instanceof PrefixExpression;
 }

@@ -44,7 +44,7 @@ export class Program implements Program {
 export interface LetStatement extends Statement {
     token: Token;
     name: Identifier;
-    value: Expression;
+    value: Expression | null;
 }
 
 export class LetStatement implements LetStatement {
@@ -77,7 +77,7 @@ export class LetStatement implements LetStatement {
 
 export interface ReturnStatement extends Statement {
     token: Token;
-    returnValue: Expression;
+    returnValue: Expression | null;
 }
 
 export class ReturnStatement implements ReturnStatement {
@@ -158,9 +158,9 @@ export interface IntegerLiteral extends Expression {
 }
 
 export class IntegerLiteral implements IntegerLiteral {
-    constructor(token: Token, value: number) {
+    constructor(token: Token) {
         this.token = token;
-        this.value = value;
+        this.value = 0;
     }
 
     ExpressionNode(): void {}
@@ -171,5 +171,31 @@ export class IntegerLiteral implements IntegerLiteral {
 
     String(): string {
         return this.value.toString();
+    }
+}
+
+export interface PrefixExpression extends Expression {
+    token: Token;
+    operator: string;
+    right: Expression | null;
+}
+
+export class PrefixExpression implements PrefixExpression {
+    constructor(token: Token, operator: string) {
+        this.token = token;
+        this.operator = operator;
+    }
+
+    ExpressionNode(): void {}
+
+    TokenLiteral(): string {
+        return this.token.literal;
+    }
+
+    String(): string {
+        if (this.right != null) {
+            return `(${this.operator}${this.right.String()})`;
+        }
+        return `(${this.operator}`;
     }
 }

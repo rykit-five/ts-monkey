@@ -3,6 +3,7 @@ import {
     Expression,
     ExpressionStatement,
     Identifier,
+    InfixExpression,
     IntegerLiteral,
     LetStatement,
     PrefixExpression,
@@ -273,6 +274,84 @@ Deno.test("TestParsingPrefixExpressions", () => {
     }
 });
 
+Deno.test("TestParsingInfixExpressions", () => {
+    class InfixTest {
+        input: string;
+        leftValue: number;
+        operator: string;
+        rightValue: number;
+
+        constructor(
+            input: string,
+            leftValue: number,
+            operator: string,
+            rightValue: number,
+        ) {
+            this.input = input;
+            this.leftValue = leftValue;
+            this.operator = operator;
+            this.rightValue = rightValue;
+        }
+    }
+
+    const infixTests: InfixTest[] = [
+        new InfixTest("5 + 5\\0", 5, "+", 5),
+        new InfixTest("5 - 5\\0", 5, "-", 5),
+        new InfixTest("5 * 5\\0", 5, "*", 5),
+        new InfixTest("5 / 5\\0", 5, "/", 5),
+        new InfixTest("5 > 5\\0", 5, ">", 5),
+        new InfixTest("5 < 5\\0", 5, "<", 5),
+        new InfixTest("5 == 5\\0", 5, "==", 5),
+        new InfixTest("5 != 5\\0", 5, "!=", 5),
+    ];
+
+    for (let i = 0; i < infixTests.length; i++) {
+        const l = new Lexer(infixTests[i].input);
+        const p = New(l);
+
+        const program = p.parseProgram();
+        CheckParseErrors(p);
+
+        if (program.statements.length != 1) {
+            assertThrows(
+                () => {
+                    throw new Error(
+                        `Program.statements does not contain 1 statements. got=${program.statements.length}`,
+                    );
+                },
+                Error,
+                "Panic!",
+            );
+        }
+
+        assert(
+            IsExpressionStatement(program.statements[0]),
+            `program.statements[0] is not ExpressionStatement. got=${
+                program.statements[0]
+            }`,
+        );
+        const stmt = program.statements[0];
+
+        assert(
+            IsInfixExpression(stmt.expression),
+            `stmt is not InfixExpression. got=${typeof stmt.expression}`,
+        );
+        const exp = stmt.expression;
+
+        assert(TestIntegerLiteral(exp.right, infixTests[i].leftValue));
+
+        assertEquals(
+            exp.operator,
+            infixTests[i].operator,
+            `exp.operator is not ${
+                infixTests[i].operator
+            }. got=${exp.operator}`,
+        );
+
+        assert(TestIntegerLiteral(exp.right, infixTests[i].rightValue));
+    }
+});
+
 function CheckParseErrors(p: Parser) {
     const errors = p.Errors();
     if (errors.length == 0) {
@@ -354,4 +433,8 @@ function IsIntegerLiteral(e: Expression | null): e is IntegerLiteral {
 
 function IsPrefixExpression(e: Expression | null): e is PrefixExpression {
     return e instanceof PrefixExpression;
+}
+
+function IsInfixExpression(e: Expression | null): e is InfixExpression {
+    return e instanceof InfixExpression;
 }

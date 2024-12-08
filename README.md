@@ -1,5 +1,5 @@
 # TS-Monkey Interpreter
 
-## Getting Start
+## Getting Started
 
 `$ deno run main.ts`

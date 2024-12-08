@@ -199,3 +199,31 @@ export class PrefixExpression implements PrefixExpression {
         return `(${this.operator}`;
     }
 }
+
+export interface InfixExpression extends Expression {
+    token: Token;
+    left: Expression | null;
+    operator: string;
+    right: Expression | null;
+}
+
+export class InfixExpression implements InfixExpression {
+    constructor(token: Token, operator: string, left: Expression) {
+        this.token = token;
+        this.operator = operator;
+        this.left = left;
+    }
+
+    ExpressionNode(): void {}
+
+    TokenLiteral(): string {
+        return this.token.literal;
+    }
+
+    String(): string {
+        if (this.left != null && this.right != null) {
+            return `${this.left.String()}${this.operator}${this.right.String()}`;
+        }
+        return `(${this.operator})`;
+    }
+}

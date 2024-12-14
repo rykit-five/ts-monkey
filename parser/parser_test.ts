@@ -1,7 +1,6 @@
 import {
     assert,
     assertEquals,
-    assertNotEquals,
     assertThrows,
 } from "jsr:@std/assert";
 import {
@@ -219,9 +218,13 @@ Deno.test("TestParsingPrefixExpressions", () => {
     class PrefixTest {
         input: string;
         operator: string;
-        integerValue: number;
+        integerValue: number | boolean;
 
-        constructor(input: string, operator: string, integerValue: number) {
+        constructor(
+            input: string,
+            operator: string,
+            integerValue: number | boolean,
+        ) {
             this.input = input;
             this.operator = operator;
             this.integerValue = integerValue;
@@ -231,6 +234,8 @@ Deno.test("TestParsingPrefixExpressions", () => {
     const prefixTests: PrefixTest[] = [
         new PrefixTest("!5\\0", "!", 5),
         new PrefixTest("-15\\0", "-", 15),
+        new PrefixTest("!true\\0", "!", true),
+        new PrefixTest("!false\\0", "!", false),
     ];
 
     for (let i = 0; i < prefixTests.length; i++) {
@@ -273,34 +278,22 @@ Deno.test("TestParsingPrefixExpressions", () => {
             }. got=${exp.operator}`,
         );
 
-        if (exp.right == null) {
-            assertThrows(
-                () => {
-                    throw new Error(
-                        `exp.right is null. got=${typeof exp.right}`,
-                    );
-                },
-                Error,
-                "Panic!",
-            );
-        } else {
-            assert(TestIntegerLiteral(exp.right, prefixTests[i].integerValue));
-        }
+        assert(TestLiteralExpression(exp.right, prefixTests[i].integerValue));
     }
 });
 
 Deno.test("TestParsingInfixExpressions", () => {
     class InfixTest {
         input: string;
-        leftValue: number;
+        leftValue: number | boolean;
         operator: string;
-        rightValue: number;
+        rightValue: number | boolean;
 
         constructor(
             input: string,
-            leftValue: number,
+            leftValue: number | boolean,
             operator: string,
-            rightValue: number,
+            rightValue: number | boolean,
         ) {
             this.input = input;
             this.leftValue = leftValue;
@@ -318,6 +311,9 @@ Deno.test("TestParsingInfixExpressions", () => {
         new InfixTest("5 < 5\\0", 5, "<", 5),
         new InfixTest("5 == 5\\0", 5, "==", 5),
         new InfixTest("5 != 5\\0", 5, "!=", 5),
+        new InfixTest("true == true\\0", true, "==", true),
+        new InfixTest("true != false\\0", true, "!=", false),
+        new InfixTest("false == false\\0", false, "==", false),
     ];
 
     for (let i = 0; i < infixTests.length; i++) {
@@ -347,46 +343,13 @@ Deno.test("TestParsingInfixExpressions", () => {
         const stmt = program.statements[0];
 
         assert(
-            IsInfixExpression(stmt.expression),
-            `stmt is not InfixExpression. got=${typeof stmt.expression}`,
+            TestInfixExpression(
+                stmt.expression,
+                infixTests[i].leftValue,
+                infixTests[i].operator,
+                infixTests[i].rightValue,
+            ),
         );
-        const exp = stmt.expression;
-
-        if (exp.right == null) {
-            assertThrows(
-                () => {
-                    throw new Error(
-                        `exp.right is null. got=${typeof exp.right}`,
-                    );
-                },
-                Error,
-                "Panic!",
-            );
-        } else {
-            assert(TestIntegerLiteral(exp.right, infixTests[i].leftValue));
-        }
-
-        assertEquals(
-            exp.operator,
-            infixTests[i].operator,
-            `exp.operator is not ${
-                infixTests[i].operator
-            }. got=${exp.operator}`,
-        );
-
-        if (exp.right == null) {
-            assertThrows(
-                () => {
-                    throw new Error(
-                        `exp.right is null. got=${typeof exp.right}`,
-                    );
-                },
-                Error,
-                "Panic!",
-            );
-        } else {
-            assert(TestIntegerLiteral(exp.right, infixTests[i].rightValue));
-        }
     }
 });
 
@@ -454,22 +417,22 @@ Deno.test("TestOperetorPrecedenceParsing", () => {
             "3 + 4 * 5 == 3 * 1 + 4 * 5\\0",
             "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))",
         ),
-        // new Test(
-        //     "true\\0",
-        //     "true",
-        // ),
-        // new Test(
-        //     "false\\0",
-        //     "false",
-        // ),
-        // new Test(
-        //     "3 > 5 == false\\0",
-        //     "((3 > 5) == false)",
-        // ),
-        // new Test(
-        //     "3 < 5 == true\\0",
-        //     "((3 < 5) == true)",
-        // ),
+        new Test(
+            "true\\0",
+            "true",
+        ),
+        new Test(
+            "false\\0",
+            "false",
+        ),
+        new Test(
+            "3 > 5 == false\\0",
+            "((3 > 5) == false)",
+        ),
+        new Test(
+            "3 < 5 == true\\0",
+            "((3 < 5) == true)",
+        ),
         // new Test(
         //     "1 + (2 + 3) + 4\\0",
         //     "((1 + (2 + 3)) + 4)",
@@ -575,7 +538,7 @@ Deno.test("TestBooleanExpressions", () => {
         const stmt = program.statements[0];
 
         assert(
-            IsBooleanExpression(stmt.expression),
+            IsBoolean(stmt.expression),
             `stmt.expression is not BooleanExpression. got=${typeof stmt
                 .expression}`,
         );
@@ -626,12 +589,15 @@ function TestLetStatement(s: Statement, name: string): boolean {
     return true;
 }
 
-function TestIntegerLiteral(il: Expression, value: number): boolean {
-    if (!IsIntegerLiteral(il)) {
-        console.error(`il not IntegerLiteral. got=${typeof il}`);
+function TestIntegerLiteral(
+    exp: Expression | null,
+    value: number | boolean,
+): boolean {
+    if (!IsIntegerLiteral(exp)) {
+        console.error(`exp not IntegerLiteral. got=${typeof exp}`);
         return false;
     }
-    const integ = il;
+    const integ = exp;
 
     if (integ.value != value) {
         console.error(`integ.value not ${value}. got=${integ.value}`);
@@ -648,7 +614,27 @@ function TestIntegerLiteral(il: Expression, value: number): boolean {
     return true;
 }
 
-function TestIdentifier(exp: Expression, value: string): boolean {
+function TestBooleanLiteral(exp: Expression | null, value: boolean): boolean {
+    if (!IsBoolean(exp)) {
+        console.error(`exp not Boolean. got=${typeof exp}`);
+        return false;
+    }
+    const bo = exp;
+
+    if (bo.value != value) {
+        console.error(`bo.value not ${value}. got=${bo.value}`);
+        return false;
+    }
+
+    if (bo.TokenLiteral() != value.toString()) {
+        console.error(`bo.TokenLiteral not ${value}. got=${bo.TokenLiteral()}`);
+        return false;
+    }
+
+    return true;
+}
+
+function TestIdentifier(exp: Expression | null, value: string): boolean {
     if (!IsIdentifier(exp)) {
         console.error(`exp not Identifier. got=${typeof exp}`);
         return false;
@@ -671,14 +657,16 @@ function TestIdentifier(exp: Expression, value: string): boolean {
 }
 
 function TestLiteralExpression(
-    exp: Expression,
-    expected: number | string,
+    exp: Expression | null,
+    expected: number | string | boolean,
 ): boolean {
     switch (typeof expected) {
         case "number":
             return TestIntegerLiteral(exp, expected);
         case "string":
             return TestIdentifier(exp, expected);
+        case "boolean":
+            return TestBooleanLiteral(exp, expected);
         default:
             console.error(`type of exp not handled. got=${typeof exp}`);
             return false;
@@ -686,10 +674,10 @@ function TestLiteralExpression(
 }
 
 function TestInfixExpression(
-    exp: Expression,
-    left: any,
+    exp: Expression | null,
+    left: number | boolean,
     operator: string,
-    right: any,
+    right: number | boolean,
 ): boolean {
     if (!IsInfixExpression(exp)) {
         console.error(`exp is not InfixExpression. got=${typeof exp}`);
@@ -697,7 +685,7 @@ function TestInfixExpression(
     }
     const opExp = exp;
 
-    if (opExp.left != left) {
+    if (!TestLiteralExpression(opExp.left, left)) {
         return false;
     }
 
@@ -706,7 +694,7 @@ function TestInfixExpression(
         return false;
     }
 
-    if (opExp.right != right) {
+    if (!TestLiteralExpression(opExp.right, right)) {
         return false;
     }
 
@@ -741,6 +729,6 @@ function IsInfixExpression(e: Expression | null): e is InfixExpression {
     return e instanceof InfixExpression;
 }
 
-function IsBooleanExpression(e: Expression | null): e is Boolean {
+function IsBoolean(e: Expression | null): e is Boolean {
     return e instanceof Boolean;
 }

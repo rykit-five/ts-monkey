@@ -1,4 +1,4 @@
-import { assert, assertEquals, assertThrows } from "jsr:@std/assert";
+import { assert, assertEquals, assertNotEquals, assertThrows } from "jsr:@std/assert";
 import {
     Expression,
     ExpressionStatement,
@@ -270,7 +270,19 @@ Deno.test("TestParsingPrefixExpressions", () => {
             }. got=${exp.operator}`,
         );
 
-        assert(TestIntegerLiteral(exp.right, prefixTests[i].integerValue));
+        if (exp.right == null) {
+            assertThrows(
+                () => {
+                    throw new Error(
+                        `exp.right is null. got=${typeof exp.right}`,
+                    );
+                },
+                Error,
+                "Panic!",
+            );
+        } else {
+            assert(TestIntegerLiteral(exp.right, prefixTests[i].integerValue));
+        }
     }
 });
 
@@ -338,7 +350,19 @@ Deno.test("TestParsingInfixExpressions", () => {
         );
         const exp = stmt.expression;
 
-        assert(TestIntegerLiteral(exp.right, infixTests[i].leftValue));
+        if (exp.right == null) {
+            assertThrows(
+                () => {
+                    throw new Error(
+                        `exp.right is null. got=${typeof exp.right}`,
+                    );
+                },
+                Error,
+                "Panic!",
+            );
+        } else {
+            assert(TestIntegerLiteral(exp.right, infixTests[i].leftValue));
+        }
 
         assertEquals(
             exp.operator,
@@ -348,7 +372,19 @@ Deno.test("TestParsingInfixExpressions", () => {
             }. got=${exp.operator}`,
         );
 
-        assert(TestIntegerLiteral(exp.right, infixTests[i].rightValue));
+        if (exp.right == null) {
+            assertThrows(
+                () => {
+                    throw new Error(
+                        `exp.right is null. got=${typeof exp.right}`,
+                    );
+                },
+                Error,
+                "Panic!",
+            );
+        } else {
+            assert(TestIntegerLiteral(exp.right, infixTests[i].rightValue));
+        }
     }
 });
 
@@ -531,7 +567,7 @@ function TestLetStatement(s: Statement, name: string): boolean {
     return true;
 }
 
-function TestIntegerLiteral(il: Expression | null, value: number): boolean {
+function TestIntegerLiteral(il: Expression, value: number): boolean {
     if (!IsIntegerLiteral(il)) {
         console.error(`il not IntegerLiteral. got=${typeof il}`);
         return false;
@@ -547,6 +583,61 @@ function TestIntegerLiteral(il: Expression | null, value: number): boolean {
         console.error(
             `integ.TokenLiteral not ${value}. got=${integ.TokenLiteral()}`,
         );
+        return false;
+    }
+
+    return true;
+}
+
+function TestIdentifier(exp: Expression, value: string): boolean {
+    if (!IsIdentifier(exp)) {
+        console.error(`exp not Identifier. got=${typeof exp}`);
+        return false;
+    }
+    const ident = exp;
+
+    if (ident.value != value) {
+        console.error(`ident.value not ${value}. got=${ident.value}`);
+        return false;
+    }
+
+    if (ident.TokenLiteral() != value) {
+        console.error(`ident.TokenLiteral not ${value}. got=${ident.TokenLiteral()}`);
+        return false;
+    }
+
+    return true;
+}
+
+function TestLiteralExpression(exp: Expression, expected: number | string): boolean {
+    switch (typeof expected) {
+        case "number":
+            return TestIntegerLiteral(exp, expected);
+        case "string":
+            return TestIdentifier(exp, expected);
+        default:
+            console.error(`type of exp not handled. got=${typeof exp}`);
+            return false;
+    }
+}
+
+function TestInfixExpression(exp: Expression, left: any, operator: string, right: any): boolean {
+    if (!IsInfixExpression(exp)) {
+        console.error(`exp is not InfixExpression. got=${typeof exp}`);
+        return false;
+    }
+    const opExp = exp;
+
+    if (opExp.left != left) {
+        return false;
+    }
+
+    if (opExp.operator != operator) {
+        console.error(`exp.operator is not ${operator}. got=${opExp.operator}`);
+        return false;
+    }
+
+    if (opExp.right != right) {
         return false;
     }
 

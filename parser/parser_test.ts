@@ -1,5 +1,11 @@
-import { assert, assertEquals, assertNotEquals, assertThrows } from "jsr:@std/assert";
 import {
+    assert,
+    assertEquals,
+    assertNotEquals,
+    assertThrows,
+} from "jsr:@std/assert";
+import {
+    Boolean,
     Expression,
     ExpressionStatement,
     Identifier,
@@ -138,9 +144,8 @@ Deno.test("TestIdentifierExpression", () => {
 
     assert(
         IsExpressionStatement(program.statements[0]),
-        `program.statements[0] not ExpressionStatement. got=${
-            program.statements[0]
-        }`,
+        `program.statements[0] not ExpressionStatement. got=${typeof program
+            .statements[0]}`,
     );
     const stmt = program.statements[0];
 
@@ -186,9 +191,8 @@ Deno.test("TestIntegerLiteralExpressoin", () => {
 
     assert(
         IsExpressionStatement(program.statements[0]),
-        `program.statements[0] not ExpressionStatement. got=${
-            program.statements[0]
-        }`,
+        `program.statements[0] not ExpressionStatement. got=${typeof program
+            .statements[0]}`,
     );
     const stmt = program.statements[0];
 
@@ -250,9 +254,8 @@ Deno.test("TestParsingPrefixExpressions", () => {
 
         assert(
             IsExpressionStatement(program.statements[0]),
-            `program.statements[0] is not ExpressionStatement. got=${
-                program.statements[0]
-            }`,
+            `program.statements[0] is not ExpressionStatement. got=${typeof program
+                .statements[0]}`,
         );
         const stmt = program.statements[0];
 
@@ -338,9 +341,8 @@ Deno.test("TestParsingInfixExpressions", () => {
 
         assert(
             IsExpressionStatement(program.statements[0]),
-            `program.statements[0] is not ExpressionStatement. got=${
-                program.statements[0]
-            }`,
+            `program.statements[0] is not ExpressionStatement. got=${typeof program
+                .statements[0]}`,
         );
         const stmt = program.statements[0];
 
@@ -530,6 +532,63 @@ Deno.test("TestOperetorPrecedenceParsing", () => {
     }
 });
 
+Deno.test("TestBooleanExpressions", () => {
+    class Test {
+        input: string;
+        expectedBoolean: boolean;
+
+        constructor(input: string, expectedBoolean: boolean) {
+            this.input = input;
+            this.expectedBoolean = expectedBoolean;
+        }
+    }
+
+    const tests: Array<Test> = [
+        new Test("true\\0", true),
+        new Test("false\\0", false),
+    ];
+
+    for (let i = 0; i < tests.length; i++) {
+        const l = new Lexer(tests[i].input);
+        const p = New(l);
+
+        const program = p.parseProgram();
+        CheckParseErrors(p);
+
+        if (program.statements.length != 1) {
+            assertThrows(
+                () => {
+                    throw new Error(
+                        `Program.statements does not contain 1 statements. got=${program.statements.length}`,
+                    );
+                },
+                Error,
+                "Panic!",
+            );
+        }
+
+        assert(
+            IsExpressionStatement(program.statements[0]),
+            `program.statements[0] is not ExpressionStatement. got=${typeof program
+                .statements[0]}`,
+        );
+        const stmt = program.statements[0];
+
+        assert(
+            IsBooleanExpression(stmt.expression),
+            `stmt.expression is not BooleanExpression. got=${typeof stmt
+                .expression}`,
+        );
+        const bool = stmt.expression;
+
+        assertEquals(
+            bool.value,
+            tests[i].expectedBoolean,
+            `bool.value is not ${tests[i].expectedBoolean}. got=${bool.value}`,
+        );
+    }
+});
+
 function CheckParseErrors(p: Parser) {
     const errors = p.Errors();
     if (errors.length == 0) {
@@ -602,14 +661,19 @@ function TestIdentifier(exp: Expression, value: string): boolean {
     }
 
     if (ident.TokenLiteral() != value) {
-        console.error(`ident.TokenLiteral not ${value}. got=${ident.TokenLiteral()}`);
+        console.error(
+            `ident.TokenLiteral not ${value}. got=${ident.TokenLiteral()}`,
+        );
         return false;
     }
 
     return true;
 }
 
-function TestLiteralExpression(exp: Expression, expected: number | string): boolean {
+function TestLiteralExpression(
+    exp: Expression,
+    expected: number | string,
+): boolean {
     switch (typeof expected) {
         case "number":
             return TestIntegerLiteral(exp, expected);
@@ -621,7 +685,12 @@ function TestLiteralExpression(exp: Expression, expected: number | string): bool
     }
 }
 
-function TestInfixExpression(exp: Expression, left: any, operator: string, right: any): boolean {
+function TestInfixExpression(
+    exp: Expression,
+    left: any,
+    operator: string,
+    right: any,
+): boolean {
     if (!IsInfixExpression(exp)) {
         console.error(`exp is not InfixExpression. got=${typeof exp}`);
         return false;
@@ -670,4 +739,8 @@ function IsPrefixExpression(e: Expression | null): e is PrefixExpression {
 
 function IsInfixExpression(e: Expression | null): e is InfixExpression {
     return e instanceof InfixExpression;
+}
+
+function IsBooleanExpression(e: Expression | null): e is Boolean {
+    return e instanceof Boolean;
 }

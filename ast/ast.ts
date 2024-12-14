@@ -227,3 +227,25 @@ export class InfixExpression implements InfixExpression {
         return `( ${this.operator} )`;
     }
 }
+
+export interface Boolean extends Expression {
+    token: Token;
+    value: boolean;
+}
+
+export class Boolean implements Boolean {
+    constructor(token: Token, value: boolean) {
+        this.token = token;
+        this.value = value;
+    }
+
+    ExpressionNode(): void {}
+
+    TokenLiteral(): string {
+        return this.token.literal;
+    }
+
+    String(): string {
+        return this.token.literal;
+    }
+}

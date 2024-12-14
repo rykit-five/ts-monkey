@@ -1,4 +1,5 @@
 import {
+    Boolean,
     Expression,
     ExpressionStatement,
     Identifier,
@@ -46,6 +47,8 @@ export function New(lexer: Lexer): Parser {
     p.registerPrefix(TokenType.INT, p.parseIntgerLiteral.bind(p));
     p.registerPrefix(TokenType.BANG, p.parsePrefixExpression.bind(p));
     p.registerPrefix(TokenType.MINUS, p.parsePrefixExpression.bind(p));
+    p.registerPrefix(TokenType.TRUE, p.parseBoolean.bind(p));
+    p.registerPrefix(TokenType.FALSE, p.parseBoolean.bind(p));
 
     p.registerInfix(TokenType.PLUS, p.parseInfixExpression.bind(p));
     p.registerInfix(TokenType.MINUS, p.parseInfixExpression.bind(p));
@@ -184,6 +187,10 @@ export class Parser {
 
     parseIdentifier(): Expression {
         return new Identifier(this.curToken, this.curToken.literal);
+    }
+
+    parseBoolean(): Boolean {
+        return new Boolean(this.curToken, this.curTokenIs(TokenType.TRUE));
     }
 
     parseIntgerLiteral(): Expression {

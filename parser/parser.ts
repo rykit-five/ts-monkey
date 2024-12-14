@@ -14,8 +14,8 @@ import {
 import { Lexer } from "../lexer/lexer.ts";
 import { Token, TokenType } from "../token/token.ts";
 
-type prefixParseFn = () => Expression;
-type infixParseFn = (left: Expression) => Expression;
+type prefixParseFn = () => Expression | null;
+type infixParseFn = (left: Expression | null) => Expression;
 
 enum Precedence {
     LOWEST = 1,
@@ -49,6 +49,7 @@ export function New(lexer: Lexer): Parser {
     p.registerPrefix(TokenType.MINUS, p.parsePrefixExpression.bind(p));
     p.registerPrefix(TokenType.TRUE, p.parseBoolean.bind(p));
     p.registerPrefix(TokenType.FALSE, p.parseBoolean.bind(p));
+    p.registerPrefix(TokenType.LPAREN, p.parseGroupedExpression.bind(p));
 
     p.registerInfix(TokenType.PLUS, p.parseInfixExpression.bind(p));
     p.registerInfix(TokenType.MINUS, p.parseInfixExpression.bind(p));
@@ -220,7 +221,7 @@ export class Parser {
         return expression;
     }
 
-    parseInfixExpression(left: Expression): Expression {
+    parseInfixExpression(left: Expression | null): Expression {
         const expression = new InfixExpression(
             this.curToken,
             this.curToken.literal,
@@ -232,6 +233,16 @@ export class Parser {
         expression.right = this.parseExpression(precedence);
 
         return expression;
+    }
+
+    parseGroupedExpression(): Expression | null {
+        this.nextToken();
+
+        const exp = this.parseExpression(Precedence.LOWEST);
+        if (!this.expectPeek(TokenType.RPAREN)) {
+            return null;
+        }
+        return exp;
     }
 
     curTokenIs(t: TokenType): boolean {

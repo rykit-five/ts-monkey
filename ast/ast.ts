@@ -208,7 +208,7 @@ export interface InfixExpression extends Expression {
 }
 
 export class InfixExpression implements InfixExpression {
-    constructor(token: Token, operator: string, left: Expression) {
+    constructor(token: Token, operator: string, left: Expression | null) {
         this.token = token;
         this.operator = operator;
         this.left = left;

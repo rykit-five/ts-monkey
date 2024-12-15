@@ -1,8 +1,10 @@
 import {
+    BlockStatement,
     Boolean,
     Expression,
     ExpressionStatement,
     Identifier,
+    IfExpression,
     InfixExpression,
     IntegerLiteral,
     LetStatement,
@@ -50,6 +52,7 @@ export function New(lexer: Lexer): Parser {
     p.registerPrefix(TokenType.TRUE, p.parseBoolean.bind(p));
     p.registerPrefix(TokenType.FALSE, p.parseBoolean.bind(p));
     p.registerPrefix(TokenType.LPAREN, p.parseGroupedExpression.bind(p));
+    p.registerPrefix(TokenType.IF, p.parseIfExpression.bind(p));
 
     p.registerInfix(TokenType.PLUS, p.parseInfixExpression.bind(p));
     p.registerInfix(TokenType.MINUS, p.parseInfixExpression.bind(p));
@@ -138,7 +141,7 @@ export class Parser {
         return stmt;
     }
 
-    parseReturnStatement(): ReturnStatement | null {
+    parseReturnStatement(): ReturnStatement {
         const stmt = new ReturnStatement(this.curToken);
 
         while (!this.curTokenIs(TokenType.SEMICOLON)) {
@@ -148,7 +151,7 @@ export class Parser {
         return stmt;
     }
 
-    parseExpressionStatement(): ExpressionStatement | null {
+    parseExpressionStatement(): ExpressionStatement {
         const stmt = new ExpressionStatement(this.curToken);
 
         stmt.expression = this.parseExpression(Precedence.LOWEST);
@@ -159,6 +162,26 @@ export class Parser {
         }
 
         return stmt;
+    }
+
+    parseBlockStatement(): BlockStatement {
+        const block = new BlockStatement(this.curToken);
+
+        this.nextToken();
+
+        // TODO: !this.curTokenIs(TokenType.TERMINAL) -> !this.curTokenIs(TokenType.EOF)
+        while (
+            !this.curTokenIs(TokenType.RBRACE) &&
+            !this.curTokenIs(TokenType.TERMINAL)
+        ) {
+            const stmt = this.parseStatement();
+            if (stmt != null) {
+                block.statements.push(stmt);
+            }
+            this.nextToken();
+        }
+
+        return block;
     }
 
     parseExpression(precedence: Precedence): Expression | null {
@@ -243,6 +266,41 @@ export class Parser {
             return null;
         }
         return exp;
+    }
+
+    parseIfExpression(): IfExpression | null {
+        const expression = new IfExpression(this.curToken);
+
+        if (!this.expectPeek(TokenType.LPAREN)) {
+            return null;
+        }
+
+        this.nextToken();
+        expression.condition = this.parseExpression(Precedence.LOWEST);
+
+        if (!this.expectPeek(TokenType.RPAREN)) {
+            return null;
+        }
+
+        if (!this.expectPeek(TokenType.LBRACE)) {
+            return null;
+        }
+
+        expression.consequence = this.parseBlockStatement();
+
+        if (this.peekTokenIs(TokenType.ELSE)) {
+            this.nextToken();
+
+            if (!this.expectPeek(TokenType.LBRACE)) {
+                return null;
+            }
+
+            expression.alternative = this.parseBlockStatement();
+        } else {
+            expression.alternative = null;
+        }
+
+        return expression;
     }
 
     curTokenIs(t: TokenType): boolean {

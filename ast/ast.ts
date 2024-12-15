@@ -130,6 +130,34 @@ export class ExpressionStatement implements ExpressionStatement {
     }
 }
 
+export interface BlockStatement extends Statement {
+    token: Token;
+    statements: Array<Statement>;
+}
+
+export class BlockStatement implements BlockStatement {
+    constructor(token: Token) {
+        this.token = token;
+        this.statements = [];
+    }
+
+    StatementNode(): void {}
+
+    TokenLiteral(): string {
+        return this.token.literal;
+    }
+
+    String(): string {
+        const out: Array<string> = [];
+
+        for (let i = 0; i < this.statements.length; i++) {
+            out.push(this.statements[i].String());
+        }
+
+        return out.join("");
+    }
+}
+
 export interface Identifier extends Expression {
     token: Token;
     value: string;
@@ -247,5 +275,42 @@ export class Boolean implements Boolean {
 
     String(): string {
         return this.token.literal;
+    }
+}
+
+export interface IfExpression extends Expression {
+    token: Token;
+    condition: Expression | null;
+    consequence: BlockStatement;
+    alternative: BlockStatement | null;
+}
+
+export class IfExpression implements IfExpression {
+    constructor(token: Token) {
+        this.token = token;
+    }
+
+    ExpressionNode(): void {}
+
+    TokenLiteral(): string {
+        return this.token.literal;
+    }
+
+    String(): string {
+        const out: Array<string> = [];
+
+        out.push("if");
+        if (this.condition != null) {
+            out.push(this.condition.String());
+        }
+        out.push(" ");
+        out.push(this.consequence.String());
+
+        if (this.alternative != null) {
+            out.push("else ");
+            out.push(this.alternative.String());
+        }
+
+        return out.join("");
     }
 }

@@ -1,13 +1,10 @@
-import {
-    assert,
-    assertEquals,
-    assertThrows,
-} from "jsr:@std/assert";
+import { assert, assertEquals, assertThrows } from "jsr:@std/assert";
 import {
     Boolean,
     Expression,
     ExpressionStatement,
     Identifier,
+    IfExpression,
     InfixExpression,
     IntegerLiteral,
     LetStatement,
@@ -552,7 +549,113 @@ Deno.test("TestBooleanExpressions", () => {
     }
 });
 
-function CheckParseErrors(p: Parser) {
+Deno.test("TestIfExpressions", () => {
+    const input = `if (x < y) { x }\\0`;
+
+    const l = new Lexer(input);
+    const p = New(l);
+
+    const program = p.parseProgram();
+    CheckParseErrors(p);
+
+    if (program.statements.length != 1) {
+        assertThrows(
+            () => {
+                throw new Error(
+                    `Program.statements does not contain 1 statements. got=${program.statements.length}`,
+                );
+            },
+            Error,
+            "Panic!",
+        );
+    }
+
+    assert(
+        IsExpressionStatement(program.statements[0]),
+        `program.statements[0] is not ExpressionStatement. got=${typeof program
+            .statements[0]}`,
+    );
+    const stmt = program.statements[0];
+
+    assert(
+        IsIfExpression(stmt.expression),
+        `stmt.expression is not IfExpression. got=${typeof stmt.expression}`,
+    );
+    const exp = stmt.expression;
+
+    assert(TestInfixExpression(exp.condition, "x", "<", "y"));
+
+    assert(
+        IsExpressionStatement(exp.consequence.statements[0]),
+        `statements[0] is not ExpressionStatement. got=${typeof exp.condition}`,
+    );
+    const consequence = exp.consequence.statements[0];
+
+    assert(TestIdentifier(consequence.expression, "x"));
+    assertEquals(
+        exp.alternative,
+        null,
+        `exp.alternative.statements was not null. got=${exp.alternative}`,
+    );
+});
+
+Deno.test("TestIfElseExpressions", () => {
+    const input = `if (x < y) { x } else { y }\\0`;
+
+    const l = new Lexer(input);
+    const p = New(l);
+
+    const program = p.parseProgram();
+    CheckParseErrors(p);
+
+    if (program.statements.length != 1) {
+        assertThrows(
+            () => {
+                throw new Error(
+                    `Program.statements does not contain 1 statements. got=${program.statements.length}`,
+                );
+            },
+            Error,
+            "Panic!",
+        );
+    }
+
+    assert(
+        IsExpressionStatement(program.statements[0]),
+        `program.statements[0] is not ExpressionStatement. got=${typeof program
+            .statements[0]}`,
+    );
+    const stmt = program.statements[0];
+
+    assert(
+        IsIfExpression(stmt.expression),
+        `stmt.expression is not IfExpression. got=${typeof stmt.expression}`,
+    );
+    const exp = stmt.expression;
+
+    assert(TestInfixExpression(exp.condition, "x", "<", "y"));
+
+    assert(
+        IsExpressionStatement(exp.consequence.statements[0]),
+        `statements[0] is not ExpressionStatement. got=${typeof exp.condition}`,
+    );
+    const consequence = exp.consequence.statements[0];
+
+    assert(TestIdentifier(consequence.expression, "x"));
+
+    if (exp.alternative != null) {
+        assert(
+            IsExpressionStatement(exp.alternative.statements[0]),
+            `statements[0] is not ExpressionStatement. got=${typeof exp
+                .alternative}`,
+        );
+        const alternative = exp.alternative.statements[0];
+
+        assert(TestIdentifier(alternative.expression, "y"));
+    }
+});
+
+function CheckParseErrors(p: Parser): void {
     const errors = p.Errors();
     if (errors.length == 0) {
         return;
@@ -675,9 +778,9 @@ function TestLiteralExpression(
 
 function TestInfixExpression(
     exp: Expression | null,
-    left: number | boolean,
+    left: number | boolean | string,
     operator: string,
-    right: number | boolean,
+    right: number | boolean | string,
 ): boolean {
     if (!IsInfixExpression(exp)) {
         console.error(`exp is not InfixExpression. got=${typeof exp}`);
@@ -731,4 +834,8 @@ function IsInfixExpression(e: Expression | null): e is InfixExpression {
 
 function IsBoolean(e: Expression | null): e is Boolean {
     return e instanceof Boolean;
+}
+
+function IsIfExpression(e: Expression | null): e is IfExpression {
+    return e instanceof IfExpression;
 }

@@ -314,3 +314,40 @@ export class IfExpression implements IfExpression {
         return out.join("");
     }
 }
+
+export interface FunctionLiteral extends Expression {
+    token: Token;
+    parameters: Array<Identifier> | null;
+    body: BlockStatement;
+}
+
+export class FunctionLiteral implements FunctionLiteral {
+    constructor(token: Token) {
+        this.token = token;
+    }
+
+    ExpressionNode(): void {}
+
+    TokenLiteral(): string {
+        return this.token.literal;
+    }
+
+    String(): string {
+        const out: Array<string> = [];
+
+        const params: Array<string> = [];
+        if (this.parameters != null) {
+            for (let i = 0; i < this.parameters.length; i++) {
+                params.push(this.parameters[i].String());
+            }
+        }
+
+        out.push(this.TokenLiteral());
+        out.push("(");
+        out.push(params.join(", "));
+        out.push(") ");
+        out.push(this.body.String());
+
+        return "";
+    }
+}

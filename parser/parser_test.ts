@@ -1,8 +1,9 @@
-import { assert, assertEquals, assertThrows } from "jsr:@std/assert";
+import { assert, assertEquals } from "jsr:@std/assert";
 import {
     Boolean,
     Expression,
     ExpressionStatement,
+    FunctionLiteral,
     Identifier,
     IfExpression,
     InfixExpression,
@@ -28,26 +29,12 @@ let foobar = 838383;
 
     const program = p.parseProgram();
     CheckParseErrors(p);
-    if (program == null) {
-        assertThrows(
-            () => {
-                throw new Error("ParseProgram() returned null");
-            },
-            Error,
-            "Panic!",
-        );
-    }
-    if (program.statements.length != 3) {
-        assertThrows(
-            () => {
-                throw new Error(
-                    `Program.statements does not contain 3 statements. got=${program.statements.length}`,
-                );
-            },
-            Error,
-            "Panic!",
-        );
-    }
+
+    assertEquals(
+        program.statements.length,
+        3,
+        `Program.statements does not contain 3 statements. got=${program.statements.length}`,
+    );
 
     class Test {
         expectedIdentifier: string;
@@ -82,26 +69,12 @@ return 838383;
 
     const program = p.parseProgram();
     CheckParseErrors(p);
-    if (program == null) {
-        assertThrows(
-            () => {
-                throw new Error("ParseProgram() returned null");
-            },
-            Error,
-            "Panic!",
-        );
-    }
-    if (program.statements.length != 3) {
-        assertThrows(
-            () => {
-                throw new Error(
-                    `Program.statements does not contain 3 statements. got=${program.statements.length}`,
-                );
-            },
-            Error,
-            "Panic!",
-        );
-    }
+
+    assertEquals(
+        program.statements.length,
+        3,
+        `Program.statements does not contain 3 statements. got=${program.statements.length}`,
+    );
 
     for (let i = 0; i < program.statements.length; i++) {
         const returnStmt = program.statements[i];
@@ -126,17 +99,11 @@ Deno.test("TestIdentifierExpression", () => {
     const program = p.parseProgram();
     CheckParseErrors(p);
 
-    if (program.statements.length != 1) {
-        assertThrows(
-            () => {
-                throw new Error(
-                    `Program.statements does not contain 1 statements. got=${program.statements.length}`,
-                );
-            },
-            Error,
-            "Panic!",
-        );
-    }
+    assertEquals(
+        program.statements.length,
+        1,
+        `Program.statements does not contain 1 statements. got=${program.statements.length}`,
+    );
 
     assert(
         IsExpressionStatement(program.statements[0]),
@@ -173,17 +140,11 @@ Deno.test("TestIntegerLiteralExpressoin", () => {
     const program = p.parseProgram();
     CheckParseErrors(p);
 
-    if (program.statements.length != 1) {
-        assertThrows(
-            () => {
-                throw new Error(
-                    `Program.statements does not contain 1 statements. got=${program.statements.length}`,
-                );
-            },
-            Error,
-            "Panic!",
-        );
-    }
+    assertEquals(
+        program.statements.length,
+        1,
+        `Program.statements does not contain 1 statements. got=${program.statements.length}`,
+    );
 
     assert(
         IsExpressionStatement(program.statements[0]),
@@ -242,17 +203,11 @@ Deno.test("TestParsingPrefixExpressions", () => {
         const program = p.parseProgram();
         CheckParseErrors(p);
 
-        if (program.statements.length != 1) {
-            assertThrows(
-                () => {
-                    throw new Error(
-                        `Program.statements does not contain 1 statements. got=${program.statements.length}`,
-                    );
-                },
-                Error,
-                "Panic!",
-            );
-        }
+        assertEquals(
+            program.statements.length,
+            1,
+            `Program.statements does not contain 1 statements. got=${program.statements.length}`,
+        );
 
         assert(
             IsExpressionStatement(program.statements[0]),
@@ -320,17 +275,11 @@ Deno.test("TestParsingInfixExpressions", () => {
         const program = p.parseProgram();
         CheckParseErrors(p);
 
-        if (program.statements.length != 1) {
-            assertThrows(
-                () => {
-                    throw new Error(
-                        `Program.statements does not contain 1 statements. got=${program.statements.length}`,
-                    );
-                },
-                Error,
-                "Panic!",
-            );
-        }
+        assertEquals(
+            program.statements.length,
+            1,
+            `Program.statements does not contain 1 statements. got=${program.statements.length}`,
+        );
 
         assert(
             IsExpressionStatement(program.statements[0]),
@@ -515,17 +464,11 @@ Deno.test("TestBooleanExpressions", () => {
         const program = p.parseProgram();
         CheckParseErrors(p);
 
-        if (program.statements.length != 1) {
-            assertThrows(
-                () => {
-                    throw new Error(
-                        `Program.statements does not contain 1 statements. got=${program.statements.length}`,
-                    );
-                },
-                Error,
-                "Panic!",
-            );
-        }
+        assertEquals(
+            program.statements.length,
+            1,
+            `Program.statements does not contain 1 statements. got=${program.statements.length}`,
+        );
 
         assert(
             IsExpressionStatement(program.statements[0]),
@@ -558,17 +501,11 @@ Deno.test("TestIfExpressions", () => {
     const program = p.parseProgram();
     CheckParseErrors(p);
 
-    if (program.statements.length != 1) {
-        assertThrows(
-            () => {
-                throw new Error(
-                    `Program.statements does not contain 1 statements. got=${program.statements.length}`,
-                );
-            },
-            Error,
-            "Panic!",
-        );
-    }
+    assertEquals(
+        program.statements.length,
+        1,
+        `Program.statements does not contain 1 statements. got=${program.statements.length}`,
+    );
 
     assert(
         IsExpressionStatement(program.statements[0]),
@@ -608,17 +545,11 @@ Deno.test("TestIfElseExpressions", () => {
     const program = p.parseProgram();
     CheckParseErrors(p);
 
-    if (program.statements.length != 1) {
-        assertThrows(
-            () => {
-                throw new Error(
-                    `Program.statements does not contain 1 statements. got=${program.statements.length}`,
-                );
-            },
-            Error,
-            "Panic!",
-        );
-    }
+    assertEquals(
+        program.statements.length,
+        1,
+        `Program.statements does not contain 1 statements. got=${program.statements.length}`,
+    );
 
     assert(
         IsExpressionStatement(program.statements[0]),
@@ -652,6 +583,127 @@ Deno.test("TestIfElseExpressions", () => {
         const alternative = exp.alternative.statements[0];
 
         assert(TestIdentifier(alternative.expression, "y"));
+    }
+});
+
+Deno.test("TestFunctionLiteralParsing", () => {
+    const input = `fn(x, y) { x + y; }\\0`;
+
+    const l = new Lexer(input);
+    const p = New(l);
+
+    const program = p.parseProgram();
+    CheckParseErrors(p);
+
+    assertEquals(
+        program.statements.length,
+        1,
+        `Program.statements does not contain 1 statements. got=${program.statements.length}`,
+    );
+
+    assert(
+        IsExpressionStatement(program.statements[0]),
+        `program.statements[0] is not ExpressionStatement. got=${typeof program
+            .statements[0]}`,
+    );
+    const stmt = program.statements[0];
+
+    assert(
+        IsFunctionLiteral(stmt.expression),
+        `stmt.expression is not FunctionLiteral. got=${typeof stmt.expression}`,
+    );
+    const func = stmt.expression;
+
+    if (func.parameters != null) {
+        assertEquals(
+            func.parameters.length,
+            2,
+            `function literal parameters wrong. want 2, got=${func.parameters.length}`,
+        );
+
+        TestLiteralExpression(func.parameters[0], "x");
+        TestLiteralExpression(func.parameters[1], "y");
+    }
+
+    assertEquals(
+        func.body.statements.length,
+        1,
+        `function body stmt has not 1 statements. got=${func.body.statements.length}`,
+    );
+
+    assert(
+        IsExpressionStatement(func.body.statements[0]),
+        `function body stmt is not ExpressionStatement. got=${typeof func.body
+            .statements[0]}`,
+    );
+    const bodyStmt = func.body.statements[0];
+
+    TestInfixExpression(bodyStmt.expression, "x", "+", "y");
+});
+
+Deno.test("TestFunctionParameterParsing", () => {
+    class Test {
+        input: string;
+        expectedParames: string[];
+
+        constructor(input: string, expectedParams: string[]) {
+            this.input = input;
+            this.expectedParames = expectedParams;
+        }
+    }
+
+    const tests: Test[] = [
+        new Test("fn() {};\\0", []),
+        new Test("fn(x) {};\\0", ["x"]),
+        new Test("fn(x, y, z) {}\\0", ["x", "y", "z"]),
+    ];
+
+    for (let i = 0; i < tests.length; i++) {
+        const l = new Lexer(tests[i].input);
+        const p = New(l);
+
+        const program = p.parseProgram();
+        CheckParseErrors(p);
+
+        // const stmt = program.statements[0];
+        // const func = stmt.expression;
+
+        assertEquals(
+            program.statements.length,
+            1,
+            `Program.statements does not contain 1 statements. got=${program.statements.length}`,
+        );
+
+        assert(
+            IsExpressionStatement(program.statements[0]),
+            `program.statements[0] is not ExpressionStatement. got=${typeof program
+                .statements[0]}`,
+        );
+        const stmt = program.statements[0];
+
+        assert(
+            IsFunctionLiteral(stmt.expression),
+            `stmt.expression is not FunctionLiteral. got=${typeof stmt
+                .expression}`,
+        );
+        const func = stmt.expression;
+
+        if (func.parameters != null) {
+            assertEquals(
+                func.parameters.length,
+                tests[i].expectedParames.length,
+                `length parameters wrong. want=${
+                    tests[i].expectedParames.length
+                }, got=${func.parameters.length}`,
+            );
+
+            for (let j = 0; j < tests[i].expectedParames.length; j++) {
+                TestLiteralExpression(
+                    func.parameters[j],
+                    tests[i].expectedParames[j],
+                );
+            }
+        }
     }
 });
 
@@ -838,4 +890,8 @@ function IsBoolean(e: Expression | null): e is Boolean {
 
 function IsIfExpression(e: Expression | null): e is IfExpression {
     return e instanceof IfExpression;
+}
+
+function IsFunctionLiteral(e: Expression | null): e is FunctionLiteral {
+    return e instanceof FunctionLiteral;
 }

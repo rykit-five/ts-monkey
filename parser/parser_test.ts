@@ -1,6 +1,7 @@
 import { assert, assertEquals } from "jsr:@std/assert";
 import {
     Boolean,
+    CallExpression,
     Expression,
     ExpressionStatement,
     FunctionLiteral,
@@ -403,18 +404,18 @@ Deno.test("TestOperetorPrecedenceParsing", () => {
             "!(true == true)\\0",
             "(!(true == true))",
         ),
-        // new Test(
-        //     "a + add(b * c) + d\\0",
-        //     "((a + add((b * c))) + d)",
-        // ),
-        // new Test(
-        //     "add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))\\0",
-        //     "add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))",
-        // ),
-        // new Test(
-        //     "add(a + b + c * d / f + g)\\0",
-        //     "add((((a + b) + ((c * d) / f)) + g))",
-        // ),
+        new Test(
+            "a + add(b * c) + d\\0",
+            "((a + add((b * c))) + d)",
+        ),
+        new Test(
+            "add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))\\0",
+            "add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))",
+        ),
+        new Test(
+            "add(a + b + c * d / f + g)\\0",
+            "add((((a + b) + ((c * d) / f)) + g))",
+        ),
         // new Test(
         //     "a * [1, 2, 3, 4][b * c] * d\\0",
         //     "((a * ([1, 2, 3, 4][(b * c)])) * d)",
@@ -665,9 +666,6 @@ Deno.test("TestFunctionParameterParsing", () => {
         const program = p.parseProgram();
         CheckParseErrors(p);
 
-        // const stmt = program.statements[0];
-        // const func = stmt.expression;
-
         assertEquals(
             program.statements.length,
             1,
@@ -704,6 +702,47 @@ Deno.test("TestFunctionParameterParsing", () => {
                 );
             }
         }
+    }
+});
+
+Deno.test("TestCallExpressionParsing", () => {
+    const input = `add(1, 2 * 3, 4 + 5);\\0`;
+
+    const l = new Lexer(input);
+    const p = New(l);
+
+    const program = p.parseProgram();
+    CheckParseErrors(p);
+
+    assertEquals(
+        program.statements.length,
+        1,
+        `Program.statements does not contain 1 statements. got=${program.statements.length}`,
+    );
+
+    assert(
+        IsExpressionStatement(program.statements[0]),
+        `program.statements[0] is not ExpressionStatement. got=${typeof program
+            .statements[0]}`,
+    );
+    const stmt = program.statements[0];
+
+    assert(
+        IsCallExpression(stmt.expression),
+        `stmt.expression is not CallExpression. got=${typeof stmt.expression}`,
+    );
+    const exp = stmt.expression;
+
+    if (exp.arguments != null) {
+        assertEquals(
+            exp.arguments.length,
+            3,
+            `wrong length of arguments. got=${exp.arguments.length}`,
+        );
+
+        TestLiteralExpression(exp.func, "add");
+        TestInfixExpression(exp.arguments[1], 2, "*", 3);
+        TestInfixExpression(exp.arguments[2], 4, "+", 5);
     }
 });
 
@@ -894,4 +933,8 @@ function IsIfExpression(e: Expression | null): e is IfExpression {
 
 function IsFunctionLiteral(e: Expression | null): e is FunctionLiteral {
     return e instanceof FunctionLiteral;
+}
+
+function IsCallExpression(e: Expression | null): e is CallExpression {
+    return e instanceof CallExpression;
 }

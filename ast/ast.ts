@@ -317,7 +317,7 @@ export class IfExpression implements IfExpression {
 
 export interface FunctionLiteral extends Expression {
     token: Token;
-    parameters: Array<Identifier> | null;
+    parameters: Identifier[] | null;
     body: BlockStatement;
 }
 
@@ -348,6 +348,48 @@ export class FunctionLiteral implements FunctionLiteral {
         out.push(") ");
         out.push(this.body.String());
 
-        return "";
+        return out.join("");
+    }
+}
+
+export interface CallExpression extends Expression {
+    token: Token;
+    func: Expression | null;
+    arguments: (Expression | null)[] | null;
+}
+
+export class CallExpression implements CallExpression {
+    constructor(token: Token, func: Expression | null) {
+        this.token = token;
+        this.func = func;
+    }
+
+    ExpressionNode(): void {}
+
+    TokenLiteral(): string {
+        return this.token.literal;
+    }
+
+    String(): string {
+        const out: string[] = [];
+
+        const args: string[] = [];
+        if (this.arguments != null) {
+            for (let i = 0; i < this.arguments.length; i++) {
+                if (this.arguments[i] != null) {
+                    // "!"で非nullを明示
+                    args.push(this.arguments[i]!.String());
+                }
+            }
+        }
+
+        if (this.func != null) {
+            out.push(this.func.String());
+        }
+        out.push("(");
+        out.push(args.join(", "));
+        out.push(")");
+
+        return out.join("");
     }
 }

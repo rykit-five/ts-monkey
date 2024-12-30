@@ -18,42 +18,50 @@ import { Lexer } from "../lexer/lexer.ts";
 import { New, Parser } from "./parser.ts";
 
 Deno.test("TestLetStatements", () => {
-    const input = `
-let x = 5;
-let y = 16;
-let foobar = 838383;
-\\0
-    `;
-
-    const l = new Lexer(input);
-    const p = New(l);
-
-    const program = p.parseProgram();
-    CheckParseErrors(p);
-
-    assertEquals(
-        program.statements.length,
-        3,
-        `Program.statements does not contain 3 statements. got=${program.statements.length}`,
-    );
-
     class Test {
+        input: string;
         expectedIdentifier: string;
+        expectedValue: number | string | boolean;
 
-        constructor(expectedIdentifier: string) {
+        constructor(
+            input: string,
+            expectedIdentifier: string,
+            expectedValue: number | string | boolean,
+        ) {
+            this.input = input;
             this.expectedIdentifier = expectedIdentifier;
+            this.expectedValue = expectedValue;
         }
     }
 
     const tests: Array<Test> = [
-        new Test("x"),
-        new Test("y"),
-        new Test("foobar"),
+        new Test("let x = 5;\\0", "x", 5),
+        new Test("let y = true;\\0", "y", true),
+        new Test("let foobar = y;\\0", "foobar", "y"),
     ];
 
     for (let i = 0; i < tests.length; i++) {
-        const stmt = program.statements[i];
+        const l = new Lexer(tests[i].input);
+        const p = New(l);
+
+        const program = p.parseProgram();
+        CheckParseErrors(p);
+
+        assertEquals(
+            program.statements.length,
+            1,
+            `Program.statements does not contain 1 statements. got=${program.statements.length}`,
+        );
+
+        const stmt = program.statements[0];
         assert(TestLetStatement(stmt, tests[i].expectedIdentifier));
+
+        assert(
+            IsLetStatement(stmt),
+            `stmt is not LetStatement. got=${typeof stmt}`,
+        );
+        const val = stmt.value;
+        assert(TestLiteralExpression(val, tests[i].expectedValue));
     }
 });
 

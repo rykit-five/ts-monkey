@@ -73,7 +73,7 @@ export function New(lexer: Lexer): Parser {
 
 export class Parser {
     l: Lexer;
-    errors: Array<string>;
+    errors: string[];
 
     curToken: Token;
     peekToken: Token;
@@ -185,7 +185,7 @@ export class Parser {
         // TODO: !this.curTokenIs(TokenType.TERMINAL) -> !this.curTokenIs(TokenType.EOF)
         while (
             !this.curTokenIs(TokenType.RBRACE) &&
-            !this.curTokenIs(TokenType.TERMINAL)
+            !(this.curTokenIs(TokenType.EOF) || this.curTokenIs(TokenType.TERMINAL))
         ) {
             const stmt = this.parseStatement();
             if (stmt != null) {
@@ -334,8 +334,8 @@ export class Parser {
         return lit;
     }
 
-    parseFunctionParameters(): Array<Identifier> | null {
-        const identifiers: Array<Identifier> = [];
+    parseFunctionParameters(): Identifier[] | null {
+        const identifiers: Identifier[] = [];
 
         if (this.peekTokenIs(TokenType.RPAREN)) {
             this.nextToken();

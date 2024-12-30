@@ -41,7 +41,7 @@ if (5 < 10) {
         }
     }
 
-    const tests: Array<Test> = [
+    const tests: Test[] = [
         new Test(TokenType.LET, "let"),
         new Test(TokenType.IDENT, "five"),
         new Test(TokenType.ASSIGN, "="),

@@ -14,7 +14,7 @@ export interface Expression extends Node {
 }
 
 export interface Program {
-    statements: Array<Statement>;
+    statements: Statement[];
 }
 
 export class Program implements Program {
@@ -31,7 +31,7 @@ export class Program implements Program {
     }
 
     String(): string {
-        const out: Array<string> = [];
+        const out: string[] = [];
 
         for (let i = 0; i < this.statements.length; i++) {
             out.push(this.statements[i].String());
@@ -59,7 +59,7 @@ export class LetStatement implements LetStatement {
     }
 
     String(): string {
-        const out: Array<string> = [];
+        const out: string[] = [];
 
         out.push(this.TokenLiteral() + " ");
         out.push(this.name.String());
@@ -92,7 +92,7 @@ export class ReturnStatement implements ReturnStatement {
     }
 
     String(): string {
-        const out: Array<string> = [];
+        const out: string[] = [];
 
         out.push(this.TokenLiteral() + " ");
 
@@ -132,7 +132,7 @@ export class ExpressionStatement implements ExpressionStatement {
 
 export interface BlockStatement extends Statement {
     token: Token;
-    statements: Array<Statement>;
+    statements: Statement[];
 }
 
 export class BlockStatement implements BlockStatement {
@@ -148,7 +148,7 @@ export class BlockStatement implements BlockStatement {
     }
 
     String(): string {
-        const out: Array<string> = [];
+        const out: string[] = [];
 
         for (let i = 0; i < this.statements.length; i++) {
             out.push(this.statements[i].String());
@@ -297,7 +297,7 @@ export class IfExpression implements IfExpression {
     }
 
     String(): string {
-        const out: Array<string> = [];
+        const out: string[] = [];
 
         out.push("if");
         if (this.condition != null) {
@@ -333,9 +333,9 @@ export class FunctionLiteral implements FunctionLiteral {
     }
 
     String(): string {
-        const out: Array<string> = [];
+        const out: string[] = [];
 
-        const params: Array<string> = [];
+        const params: string[] = [];
         if (this.parameters != null) {
             for (let i = 0; i < this.parameters.length; i++) {
                 params.push(this.parameters[i].String());

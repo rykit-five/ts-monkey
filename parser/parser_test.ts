@@ -34,7 +34,7 @@ Deno.test("TestLetStatements", () => {
         }
     }
 
-    const tests: Array<Test> = [
+    const tests: Test[] = [
         new Test("let x = 5;\\0", "x", 5),
         new Test("let y = true;\\0", "y", true),
         new Test("let foobar = y;\\0", "foobar", "y"),
@@ -319,7 +319,7 @@ Deno.test("TestOperetorPrecedenceParsing", () => {
         }
     }
 
-    const tests: Array<Test> = [
+    const tests: Test[] = [
         new Test(
             "-a * b\\0",
             "((-a) * b)",
@@ -461,7 +461,7 @@ Deno.test("TestBooleanExpressions", () => {
         }
     }
 
-    const tests: Array<Test> = [
+    const tests: Test[] = [
         new Test("true\\0", true),
         new Test("false\\0", false),
     ];

@@ -185,7 +185,8 @@ export class Parser {
         // TODO: !this.curTokenIs(TokenType.TERMINAL) -> !this.curTokenIs(TokenType.EOF)
         while (
             !this.curTokenIs(TokenType.RBRACE) &&
-            !(this.curTokenIs(TokenType.EOF) || this.curTokenIs(TokenType.TERMINAL))
+            !(this.curTokenIs(TokenType.EOF) ||
+                this.curTokenIs(TokenType.TERMINAL))
         ) {
             const stmt = this.parseStatement();
             if (stmt != null) {

@@ -1,6 +1,6 @@
 import { assert, assertEquals } from "jsr:@std/assert";
 import {
-    Boolean,
+    BooleanLiteral,
     CallExpression,
     Expression,
     ExpressionStatement,
@@ -487,7 +487,7 @@ Deno.test("TestBooleanExpressions", () => {
         const stmt = program.statements[0];
 
         assert(
-            IsBoolean(stmt.expression),
+            IsBooleanLiteral(stmt.expression),
             `stmt.expression is not BooleanExpression. got=${typeof stmt
                 .expression}`,
         );
@@ -817,7 +817,7 @@ function TestIntegerLiteral(
 }
 
 function TestBooleanLiteral(exp: Expression | null, value: boolean): boolean {
-    if (!IsBoolean(exp)) {
+    if (!IsBooleanLiteral(exp)) {
         console.error(`exp not Boolean. got=${typeof exp}`);
         return false;
     }
@@ -931,8 +931,8 @@ function IsInfixExpression(e: Expression | null): e is InfixExpression {
     return e instanceof InfixExpression;
 }
 
-function IsBoolean(e: Expression | null): e is Boolean {
-    return e instanceof Boolean;
+function IsBooleanLiteral(e: Expression | null): e is BooleanLiteral {
+    return e instanceof BooleanLiteral;
 }
 
 function IsIfExpression(e: Expression | null): e is IfExpression {

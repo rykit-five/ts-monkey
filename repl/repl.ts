@@ -1,6 +1,7 @@
 import { Token, TokenType } from "../token/token.ts";
 import { Lexer } from "../lexer/lexer.ts";
 import { New, Parser } from "../parser/parser.ts";
+import { evaluate } from "../evaluator/evaluator.ts";
 
 const PROMPT: string = ">> ";
 
@@ -8,6 +9,7 @@ export async function start() {
     const decoder = new TextDecoder();
     const encoder = new TextEncoder();
 
+    // TODO: 標準入力からEOFを受け付けて構文解析する
     Deno.stdout.write(encoder.encode(PROMPT));
     for await (const chunk of Deno.stdin.readable) {
         Deno.stdout.write(encoder.encode(PROMPT));
@@ -22,17 +24,11 @@ export async function start() {
             continue;
         }
 
-        Deno.stdout.write(encoder.encode(program.String()));
-        Deno.stdout.write(encoder.encode("\n"));
-
-        // for (
-        //     let tok: Token = l.NextToken();
-        //     tok.type != TokenType.EOF;
-        //     tok = l.NextToken()
-        // ) {
-        //     // await Deno.stdout.write(tok);
-        //     console.log(`{Type: ${tok.type} Literal: ${tok.literal}}`);
-        // }
+        const evaluated = evaluate(program);
+        if (evaluated != null) {
+            Deno.stdout.write(encoder.encode(evaluated.Inspect()));
+            Deno.stdout.write(encoder.encode("\n"));
+        }
     }
 }
 

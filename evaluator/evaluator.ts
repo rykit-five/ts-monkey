@@ -1,4 +1,5 @@
 import {
+    BooleanLiteral,
     Expression,
     ExpressionStatement,
     IntegerLiteral,
@@ -6,16 +7,20 @@ import {
     Program,
     Statement,
 } from "../ast/ast.ts";
-import { Integer, Object } from "../object/object.ts";
+import { Boolean, Integer, Object } from "../object/object.ts";
+
+const TRUE = new Boolean(true);
+const FALSE = new Boolean(false);
 
 export function evaluate(node: Node | null): Object | null {
     if (IsProgram(node)) {
         return evaluateStatements(node.statements);
     } else if (IsExpressionStatement(node)) {
         return evaluate(node.expression);
-    }
-    if (IsIntegerLiteral(node)) {
+    } else if (IsIntegerLiteral(node)) {
         return new Integer(node.value);
+    } else if (IsBooleanLiteral(node)) {
+        return nativeBoolToBooleanObject(node.value);
     }
 
     return null;
@@ -31,6 +36,14 @@ function evaluateStatements(stmts: Statement[]): Object | null {
     return result;
 }
 
+function nativeBoolToBooleanObject(input: boolean): Object {
+    if (input) {
+        return TRUE;
+    } else {
+        return FALSE;
+    }
+}
+
 function IsProgram(n: Node | null): n is Program {
     return n instanceof Program;
 }
@@ -41,4 +54,8 @@ function IsExpressionStatement(n: Node | null): n is ExpressionStatement {
 
 function IsIntegerLiteral(n: Node | null): n is IntegerLiteral {
     return n instanceof IntegerLiteral;
+}
+
+function IsBooleanLiteral(n: Node | null): n is BooleanLiteral {
+    return n instanceof BooleanLiteral;
 }

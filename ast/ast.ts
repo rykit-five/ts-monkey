@@ -256,12 +256,12 @@ export class InfixExpression implements InfixExpression {
     }
 }
 
-export interface Boolean extends Expression {
+export interface BooleanLiteral extends Expression {
     token: Token;
     value: boolean;
 }
 
-export class Boolean implements Boolean {
+export class BooleanLiteral implements BooleanLiteral {
     constructor(token: Token, value: boolean) {
         this.token = token;
         this.value = value;

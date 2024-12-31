@@ -38,8 +38,8 @@ export interface Boolean extends Object {
 }
 
 export class Boolean implements Boolean {
-    constructor() {
-        this.value = false;
+    constructor(value: boolean) {
+        this.value = value;
     }
 
     Type(): ObjectType {

@@ -8,7 +8,7 @@
             "request": "launch",
             "name": "Launch Program",
             "type": "node",
-            "program": "${workspaceFolder}/evaluater/evaluater.test.ts",
+            "program": "${workspaceFolder}/evaluator/evaluator.test.ts",
             "cwd": "${workspaceFolder}",
             "env": {},
             "runtimeExecutable": "/opt/homebrew/bin/deno",

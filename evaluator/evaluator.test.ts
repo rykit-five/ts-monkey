@@ -13,6 +13,8 @@ Deno.test("TestEvalIntegerExpression", () => {
     const tests: Test[] = [
         { input: "5\\0", expected: 5 },
         { input: "10\\0", expected: 10 },
+        { input: "-5\\0", expected: -5 },
+        { input: "-10\\0", expected: -10 },
     ];
 
     tests.forEach((tt) => {
@@ -30,6 +32,27 @@ Deno.test("TestEvalBooleanExpression", () => {
     const tests: Test[] = [
         { input: "true\\0", expected: true },
         { input: "false\\0", expected: false },
+    ];
+
+    tests.forEach((tt) => {
+        const evaluated = testEval(tt.input);
+        assert(testBooleanObject(evaluated, tt.expected));
+    });
+});
+
+Deno.test("TestEvalBooleanExpression", () => {
+    type Test = {
+        input: string;
+        expected: boolean;
+    };
+
+    const tests: Test[] = [
+        { input: "!true\\0", expected: false },
+        { input: "!false\\0", expected: true },
+        { input: "!5\\0", expected: false },
+        { input: "!!true\\0", expected: true },
+        { input: "!!false\\0", expected: false },
+        { input: "!!5\\0", expected: true },
     ];
 
     tests.forEach((tt) => {

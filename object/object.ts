@@ -1,9 +1,9 @@
 type ObjectType = string;
 
-enum ObjectKind {
+export enum ObjectKind {
+    NULL_OBJ = "NULL",
     INTEGER_OBJ = "INTEGER",
     BOOLEAN_OBJ = "BOOLEAN",
-    NULL_OBJ = "NULL",
 }
 
 export interface Object {
@@ -11,8 +11,16 @@ export interface Object {
     Inspect(): string;
 }
 
-export class Object implements Object {
+export class Null implements Object {
     constructor() {}
+
+    Type(): ObjectType {
+        return ObjectKind.NULL_OBJ;
+    }
+
+    Inspect(): string {
+        return "null";
+    }
 }
 
 export interface Integer extends Object {
@@ -48,17 +56,5 @@ export class Boolean implements Boolean {
 
     Inspect(): string {
         return `${this.value}`;
-    }
-}
-
-export class Null implements Object {
-    constructor() {}
-
-    Type(): ObjectType {
-        return ObjectKind.NULL_OBJ;
-    }
-
-    Inspect(): string {
-        return "null";
     }
 }

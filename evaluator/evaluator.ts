@@ -1,6 +1,8 @@
 import {
+    BlockStatement,
     BooleanLiteral,
     ExpressionStatement,
+    IfExpression,
     InfixExpression,
     IntegerLiteral,
     Node,
@@ -16,9 +18,9 @@ import {
     ObjectKind,
 } from "../object/object.ts";
 
-const NULL = new Null();
-const TRUE = new Boolean(true);
-const FALSE = new Boolean(false);
+export const NULL = new Null();
+export const TRUE = new Boolean(true);
+export const FALSE = new Boolean(false);
 
 export function evaluate(node: Node | null): Object | null {
     if (IsProgram(node)) {
@@ -36,6 +38,10 @@ export function evaluate(node: Node | null): Object | null {
         const left = evaluate(node.left);
         const right = evaluate(node.right);
         return evaluateInfixExpression(node.operator, left, right);
+    } else if (IsBlockStatement(node)) {
+        return evaluateStatements(node.statements);
+    } else if (IsIfExpression(node)) {
+        return evaluateIfExpression(node);
     }
 
     return null;
@@ -152,11 +158,36 @@ function evaluateIntegerInfixExpression(
     }
 }
 
+function evaluateIfExpression(ie: IfExpression): Object | null {
+    const condition = evaluate(ie.condition);
+
+    if (isTruthy(condition)) {
+        return evaluate(ie.consequence);
+    } else if (ie.alternative != null) {
+        return evaluate(ie.alternative);
+    } else {
+        return NULL;
+    }
+}
+
 function nativeBoolToBooleanObject(input: boolean): Object {
     if (input) {
         return TRUE;
     } else {
         return FALSE;
+    }
+}
+
+function isTruthy(obj: Object | null): boolean {
+    switch (obj) {
+        case NULL:
+            return false;
+        case TRUE:
+            return true;
+        case FALSE:
+            return false;
+        default:
+            return true;
     }
 }
 
@@ -182,4 +213,12 @@ function IsPrefixExpression(n: Node | null): n is PrefixExpression {
 
 function IsInfixExpression(n: Node | null): n is InfixExpression {
     return n instanceof InfixExpression;
+}
+
+function IsBlockStatement(n: Node | null): n is BlockStatement {
+    return n instanceof BlockStatement;
+}
+
+function IsIfExpression(n: Node | null): n is IfExpression {
+    return n instanceof IfExpression;
 }

@@ -1,8 +1,8 @@
-import { assert, assertEquals } from "jsr:@std/assert";
+import { assert } from "jsr:@std/assert";
 import { Lexer } from "../lexer/lexer.ts";
 import { Boolean, Integer, Object } from "../object/object.ts";
-import { New, Parser } from "../parser/parser.ts";
-import { evaluate } from "./evaluator.ts";
+import { New } from "../parser/parser.ts";
+import { evaluate, NULL } from "./evaluator.ts";
 
 Deno.test("TestEvalIntegerExpression", () => {
     type Test = {
@@ -90,6 +90,33 @@ Deno.test("TestEvalBooleanExpression", () => {
     });
 });
 
+Deno.test("TestIfElseExpressions", () => {
+    type Test = {
+        input: string;
+        expected: number | null;
+    };
+
+    const tests: Test[] = [
+        { input: "if (true) { 10 }\\0", expected: 10 },
+        { input: "if (false) { 10 }\\0", expected: null },
+        { input: "if (1) { 10 }\\0", expected: 10 },
+        { input: "if (1 < 2) { 10 }\\0", expected: 10 },
+        { input: "if (1 > 2) { 10 }\\0", expected: null },
+        { input: "if (1 > 2) { 10 } else { 20 }\\0", expected: 20 },
+        { input: "if (1 < 2) { 10 } else { 20 }\\0", expected: 10 },
+    ];
+
+    tests.forEach((tt) => {
+        const evaluated = testEval(tt.input);
+        if (typeof tt.expected == "number") {
+            assert(testIntegerObject(evaluated, tt.expected));
+        } else {
+            assert(testNullObject(evaluated));
+        }
+    });
+
+});
+
 function testEval(input: string): Object | null {
     const l = new Lexer(input);
     const p = New(l);
@@ -124,6 +151,15 @@ function testBooleanObject(obj: Object | null, expected: boolean): boolean {
         console.error(
             `object has wrong value. got=${result.value}, want=${expected}`,
         );
+        return false;
+    }
+
+    return true;
+}
+
+function testNullObject(obj: Object | null): boolean {
+    if (obj != NULL) {
+        console.error(`object is not NULL. got=${typeof obj}`);
         return false;
     }
 

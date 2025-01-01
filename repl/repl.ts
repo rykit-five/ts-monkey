@@ -1,6 +1,5 @@
-import { Token, TokenType } from "../token/token.ts";
 import { Lexer } from "../lexer/lexer.ts";
-import { New, Parser } from "../parser/parser.ts";
+import { New } from "../parser/parser.ts";
 import { evaluate } from "../evaluator/evaluator.ts";
 
 const PROMPT: string = ">> ";

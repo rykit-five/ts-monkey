@@ -15,6 +15,18 @@ Deno.test("TestEvalIntegerExpression", () => {
         { input: "10\\0", expected: 10 },
         { input: "-5\\0", expected: -5 },
         { input: "-10\\0", expected: -10 },
+        { input: "1 + 2 + 3 + 4 + 5\\0", expected: 15 },
+        { input: "5 + 5 + 5 + 5 - 10\\0", expected: 10 },
+        { input: "2 * 2 * 2 * 2 * 2\\0", expected: 32 },
+        { input: "-50 + 100 + -50\\0", expected: 0 },
+        { input: "5 * 2 + 10\\0", expected: 20 },
+        { input: "5 + 2 * 10\\0", expected: 25 },
+        { input: "20 + 2 * -10\\0", expected: 0 },
+        { input: "50 / 2 * 2 + 10\\0", expected: 60 },
+        { input: "2 * (5 + 10)\\0", expected: 30 },
+        { input: "3 * 3 * 3 + 10\\0", expected: 37 },
+        { input: "3 * (3 * 3) + 10\\0", expected: 37 },
+        { input: "(5 + 10 * 2 + 15 / 3) * 2 + -10\\0", expected: 50 },
     ];
 
     tests.forEach((tt) => {
@@ -32,6 +44,23 @@ Deno.test("TestEvalBooleanExpression", () => {
     const tests: Test[] = [
         { input: "true\\0", expected: true },
         { input: "false\\0", expected: false },
+        { input: "1 < 2\\0", expected: true },
+        { input: "1 > 2\\0", expected: false },
+        { input: "1 < 1\\0", expected: false },
+        { input: "1 > 1\\0", expected: false },
+        { input: "1 == 1\\0", expected: true },
+        { input: "1 != 1\\0", expected: false },
+        { input: "1 == 2\\0", expected: false },
+        { input: "1 != 2\\0", expected: true },
+        { input: "true == true\\0", expected: true },
+        { input: "false == false\\0", expected: true },
+        { input: "true == false\\0", expected: false },
+        { input: "true != false\\0", expected: true },
+        { input: "false != true\\0", expected: true },
+        { input: "(1 < 2) == true\\0", expected: true },
+        { input: "(1 < 2) == false\\0", expected: false },
+        { input: "(1 > 2) == true\\0", expected: false },
+        { input: "(1 > 2) == false\\0", expected: true },
     ];
 
     tests.forEach((tt) => {

@@ -1,6 +1,7 @@
 import {
     BooleanLiteral,
     ExpressionStatement,
+    InfixExpression,
     IntegerLiteral,
     Node,
     PrefixExpression,
@@ -31,6 +32,10 @@ export function evaluate(node: Node | null): Object | null {
     } else if (IsPrefixExpression(node)) {
         const right = evaluate(node.right);
         return evaluatePrefixExpression(node.operator, right);
+    } else if (IsInfixExpression(node)) {
+        const left = evaluate(node.left);
+        const right = evaluate(node.right);
+        return evaluateInfixExpression(node.operator, left, right);
     }
 
     return null;
@@ -86,6 +91,67 @@ function evaluateMinusOperatorExpression(right: Object | null): Object {
     return NULL;
 }
 
+function evaluateInfixExpression(
+    operator: string,
+    left: Object | null,
+    right: Object | null,
+): Object {
+    if (
+        left?.Type() == ObjectKind.INTEGER_OBJ &&
+        right?.Type() == ObjectKind.INTEGER_OBJ
+    ) {
+        return evaluateIntegerInfixExpression(operator, left, right);
+    } else if (operator == "==") {
+        return nativeBoolToBooleanObject(left == right);
+    } else if (operator == "!=") {
+        return nativeBoolToBooleanObject(left != right);
+    } else {
+        return NULL;
+    }
+}
+
+function evaluateIntegerInfixExpression(
+    operator: string,
+    left: Object | null,
+    right: Object | null,
+): Object {
+    let leftVal = 0;
+    let rightVal = 0;
+
+    if (left instanceof Integer) {
+        leftVal = left.value;
+    } else {
+        return NULL;
+    }
+
+    if (right instanceof Integer) {
+        rightVal = right.value;
+    } else {
+        return NULL;
+    }
+
+    switch (operator) {
+        case "+":
+            return new Integer(leftVal + rightVal);
+        case "-":
+            return new Integer(leftVal - rightVal);
+        case "*":
+            return new Integer(leftVal * rightVal);
+        case "/":
+            return new Integer(leftVal / rightVal);
+        case "<":
+            return nativeBoolToBooleanObject(leftVal < rightVal);
+        case ">":
+            return nativeBoolToBooleanObject(leftVal > rightVal);
+        case "==":
+            return nativeBoolToBooleanObject(leftVal == rightVal);
+        case "!=":
+            return nativeBoolToBooleanObject(leftVal != rightVal);
+        default:
+            return NULL;
+    }
+}
+
 function nativeBoolToBooleanObject(input: boolean): Object {
     if (input) {
         return TRUE;
@@ -112,4 +178,8 @@ function IsBooleanLiteral(n: Node | null): n is BooleanLiteral {
 
 function IsPrefixExpression(n: Node | null): n is PrefixExpression {
     return n instanceof PrefixExpression;
+}
+
+function IsInfixExpression(n: Node | null): n is InfixExpression {
+    return n instanceof InfixExpression;
 }

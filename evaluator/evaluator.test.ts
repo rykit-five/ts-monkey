@@ -1,6 +1,6 @@
 import { assert, assertEquals } from "jsr:@std/assert";
 import { Lexer } from "../lexer/lexer.ts";
-import { Boolean, Error, Integer, Object } from "../object/object.ts";
+import { NewEnvironment, Boolean, Error, Integer, Object } from "../object/object.ts";
 import { New } from "../parser/parser.ts";
 import { evaluate, NULL } from "./evaluator.ts";
 
@@ -198,6 +198,10 @@ if (10 > 1) {
 \\0`,
             expectedMessage: "unknown operator: BOOLEAN + BOOLEAN",
         },
+        {
+			input: "foobar\\0",
+			expectedMessage: "identifier not found: foobar",
+		},
     ];
 
     tests.forEach((tt, i) => {
@@ -217,12 +221,32 @@ if (10 > 1) {
     });
 });
 
+Deno.test("TestLetStatements", () => {
+    type Test = {
+        input: string;
+        expected: number;
+    };
+
+    const tests: Test[] = [
+        {input: "let a = 5; a;\\0", expected: 5},
+		{input: "let a = 5 * 5; a;\\0", expected: 25},
+		{input: "let a = 5; let b = a; b;\\0", expected: 5},
+		{input: "let a = 5; let b = a; let c = a + b + 5; c;\\0", expected: 15},
+    ];
+
+    tests.forEach((tt) => {
+        const evaluated = testEval(tt.input);
+        assert(testIntegerObject(evaluated, tt.expected));
+    });
+});
+
 function testEval(input: string): Object | null {
     const l = new Lexer(input);
     const p = New(l);
     const program = p.parseProgram();
+    const env = NewEnvironment();
 
-    return evaluate(program);
+    return evaluate(program, env);
 }
 
 function testIntegerObject(obj: Object | null, expected: number): boolean {

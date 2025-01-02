@@ -11,6 +11,37 @@ export enum ObjectKind {
     RETURN_VALUE_OBJ = "RETURN_VALUE",
 }
 
+export function NewEnvironment(): Environment {
+    const s = new Map<string, Object>([]);
+    return new Environment(s);
+}
+
+export interface Environment {
+    store: Map<string, Object>;
+}
+
+export class Environment implements Environment {
+    constructor(store: Map<string, Object>) {
+        this.store = store;
+    }
+
+    Get(name: string): [Object, boolean] {
+        const obj = this.store.get(name);
+        if (obj != undefined) {
+            return [obj, true]
+        }
+        // objはundefinedであるが、Objectを返したいのでNULLを返す
+        return [new Null(), false]
+    }
+
+    Set(name: string, val: Object | null) {
+        if (val != null) {
+            this.store.set(name, val);
+            
+        return val;
+    }
+}}
+
 export interface Object {
     Type(): ObjectType;
     Inspect(): string;

@@ -2,9 +2,11 @@ import {
     BlockStatement,
     BooleanLiteral,
     ExpressionStatement,
+    Identifier,
     IfExpression,
     InfixExpression,
     IntegerLiteral,
+    LetStatement,
     Node,
     PrefixExpression,
     Program,
@@ -14,6 +16,7 @@ import {
 } from "../ast/ast.ts";
 import {
     Boolean,
+    Environment,
     Error,
     Integer,
     Null,
@@ -27,19 +30,27 @@ export const NULL = new Null();
 export const TRUE = new Boolean(true);
 export const FALSE = new Boolean(false);
 
-export function evaluate(node: Node | null): Object | null {
+export function evaluate(node: Node | null, env: Environment): Object | null {
     if (IsProgram(node)) {
-        return evaluateProgram(node.statements);
+        return evaluateProgram(node.statements, env);
     } else if (IsExpressionStatement(node)) {
-        return evaluate(node.expression);
+        return evaluate(node.expression, env);
+    } else if (IsLetStatement(node)) {
+        const val = evaluate(node.value, env);
+        if (isError(val)) {
+            return val;
+        }
+        env.Set(node.name.value, val);
     } else if (IsReturnStatement(node)) {
-        const val = evaluate(node.returnValue);
+        const val = evaluate(node.returnValue, env);
         if (isError(val)) {
             return val;
         }
         return new ReturnValue(val);
     } else if (IsBlockStatement(node)) {
-        return evaluateBlockStatement(node);
+        return evaluateBlockStatement(node, env);
+    } else if (IsIdentifier(node)) {
+        return evaluateIdentifier(node, env);
     } else if (IsIntegerLiteral(node)) {
         return new Integer(node.value);
     } else if (IsStringLiteral(node)) {
@@ -47,33 +58,33 @@ export function evaluate(node: Node | null): Object | null {
     } else if (IsBooleanLiteral(node)) {
         return nativeBoolToBooleanObject(node.value);
     } else if (IsPrefixExpression(node)) {
-        const right = evaluate(node.right);
+        const right = evaluate(node.right, env);
         if (isError(right)) {
             return right;
         }
         return evaluatePrefixExpression(node.operator, right);
     } else if (IsInfixExpression(node)) {
-        const left = evaluate(node.left);
+        const left = evaluate(node.left, env);
         if (isError(left)) {
             return left;
         }
-        const right = evaluate(node.right);
+        const right = evaluate(node.right, env);
         if (isError(right)) {
             return right;
         }
         return evaluateInfixExpression(node.operator, left, right);
     } else if (IsIfExpression(node)) {
-        return evaluateIfExpression(node);
+        return evaluateIfExpression(node, env);
     }
 
     return null;
 }
 
-function evaluateProgram(stmts: Statement[]): Object | null {
+function evaluateProgram(stmts: Statement[], env: Environment): Object | null {
     let result: Object | null = null;
 
     for (let i = 0; i < stmts.length; i++) {
-        result = evaluate(stmts[i]);
+        result = evaluate(stmts[i], env);
 
         if (result instanceof ReturnValue) {
             return result.value;
@@ -85,11 +96,11 @@ function evaluateProgram(stmts: Statement[]): Object | null {
     return result;
 }
 
-function evaluateBlockStatement(block: BlockStatement): Object | null {
+function evaluateBlockStatement(block: BlockStatement, env: Environment): Object | null {
     let result: Object | null = null;
 
     for (let i = 0; i < block.statements.length; i++) {
-        result = evaluate(block.statements[i]);
+        result = evaluate(block.statements[i], env);
 
         if (result != null) {
             const rt = result.Type();
@@ -100,6 +111,15 @@ function evaluateBlockStatement(block: BlockStatement): Object | null {
     }
 
     return result;
+}
+
+function evaluateIdentifier(node: Identifier, env: Environment): Object {
+    const [val, ok] = env.Get(node.value);
+    if (!ok) {
+        return newError(`identifier not found: ${node.value}`);
+    }
+
+    return val;
 }
 
 function evaluatePrefixExpression(
@@ -211,16 +231,16 @@ function evaluateIntegerInfixExpression(
     }
 }
 
-function evaluateIfExpression(ie: IfExpression): Object | null {
-    const condition = evaluate(ie.condition);
+function evaluateIfExpression(ie: IfExpression, env: Environment): Object | null {
+    const condition = evaluate(ie.condition, env);
     if (isError(condition)) {
         return condition;
     }
 
     if (isTruthy(condition)) {
-        return evaluate(ie.consequence);
+        return evaluate(ie.consequence, env);
     } else if (ie.alternative != null) {
-        return evaluate(ie.alternative);
+        return evaluate(ie.alternative, env);
     } else {
         return NULL;
     }
@@ -266,8 +286,16 @@ function IsExpressionStatement(n: Node | null): n is ExpressionStatement {
     return n instanceof ExpressionStatement;
 }
 
+function IsLetStatement(n: Node | null): n is LetStatement {
+    return n instanceof LetStatement;
+}
+
 function IsReturnStatement(n: Node | null): n is ReturnStatement {
     return n instanceof ReturnStatement;
+}
+
+function IsIdentifier(n: Node | null): n is Identifier {
+    return n instanceof Identifier;
 }
 
 function IsIntegerLiteral(n: Node | null): n is IntegerLiteral {

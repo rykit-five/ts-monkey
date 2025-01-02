@@ -1,6 +1,6 @@
-import { assert } from "jsr:@std/assert";
+import { assert, assertEquals } from "jsr:@std/assert";
 import { Lexer } from "../lexer/lexer.ts";
-import { Boolean, Integer, Object } from "../object/object.ts";
+import { Boolean, Error, Integer, Object } from "../object/object.ts";
 import { New } from "../parser/parser.ts";
 import { evaluate, NULL } from "./evaluator.ts";
 
@@ -147,6 +147,76 @@ if (10 > 1) {
     });
 });
 
+Deno.test("TestErrorHandling", () => {
+    type Test = {
+        input: string;
+        expectedMessage: string;
+    };
+
+    const tests: Test[] = [
+        {
+            input: "5 + true;\\0",
+            expectedMessage: "type mismatch: INTEGER + BOOLEAN",
+        },
+        {
+            input: "5 + true; 5;\\0",
+            expectedMessage: "type mismatch: INTEGER + BOOLEAN",
+        },
+        {
+            input: "-true\\0",
+            expectedMessage: "unknown operator: -BOOLEAN",
+        },
+        {
+            input: "true + false;\\0",
+            expectedMessage: "unknown operator: BOOLEAN + BOOLEAN",
+        },
+        {
+            input: "true + false + true + false;\\0",
+            expectedMessage: "unknown operator: BOOLEAN + BOOLEAN",
+        },
+        {
+            input: "5; true + false; 5\\0",
+            expectedMessage: "unknown operator: BOOLEAN + BOOLEAN",
+        },
+        {
+            input: `"Hello" - "World"\\0`,
+            expectedMessage: "unknown operator: STRING - STRING",
+        },
+        {
+            input: "if (10 > 1) { true + false; }\\0",
+            expectedMessage: "unknown operator: BOOLEAN + BOOLEAN",
+        },
+        {
+            input: `
+if (10 > 1) {
+  if (10 > 1) {
+    return true + false;
+  }
+
+  return 1;
+}
+\\0`,
+            expectedMessage: "unknown operator: BOOLEAN + BOOLEAN",
+        },
+    ];
+
+    tests.forEach((tt, i) => {
+        const evaluated = testEval(tt.input);
+
+        assert(
+            IsError(evaluated),
+            `no error object returned. got=${typeof evaluated}`,
+        );
+        const errObj = evaluated;
+
+        assertEquals(
+            errObj?.message,
+            tt.expectedMessage,
+            `wrong error message. got=${errObj?.message}, want=${tt.expectedMessage} ${i}`,
+        );
+    });
+});
+
 function testEval(input: string): Object | null {
     const l = new Lexer(input);
     const p = New(l);
@@ -202,4 +272,8 @@ function IsInteger(o: Object | null): o is Integer {
 
 function IsBoolean(o: Object | null): o is Boolean {
     return o instanceof Boolean;
+}
+
+function IsError(o: Object | null): o is Error {
+    return o instanceof Error;
 }

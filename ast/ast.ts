@@ -202,6 +202,28 @@ export class IntegerLiteral implements IntegerLiteral {
     }
 }
 
+export interface StringLiteral extends Expression {
+    token: Token;
+    value: string;
+}
+
+export class StringLiteral implements StringLiteral {
+    constructor(token: Token, value: string) {
+        this.token = token;
+        this.value = value;
+    }
+
+    ExpressionNode(): void {}
+
+    TokenLiteral(): string {
+        return this.token.literal;
+    }
+
+    String(): string {
+        return this.token.literal;
+    }
+}
+
 export interface PrefixExpression extends Expression {
     token: Token;
     operator: string;

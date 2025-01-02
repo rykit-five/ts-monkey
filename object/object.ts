@@ -2,8 +2,12 @@ type ObjectType = string;
 
 export enum ObjectKind {
     NULL_OBJ = "NULL",
+    ERROR_OBJ = "ERROR",
+
     INTEGER_OBJ = "INTEGER",
     BOOLEAN_OBJ = "BOOLEAN",
+    STRING_OBJ = "STRING",
+
     RETURN_VALUE_OBJ = "RETURN_VALUE",
 }
 
@@ -39,6 +43,24 @@ export class Integer implements Integer {
 
     Inspect(): string {
         return `${this.value}`;
+    }
+}
+
+export interface String extends Object {
+    value: string;
+}
+
+export class String implements String {
+    constructor(value: string) {
+        this.value = value;
+    }
+
+    Type(): ObjectType {
+        return ObjectKind.STRING_OBJ;
+    }
+
+    Inspect(): string {
+        return this.value;
     }
 }
 
@@ -79,5 +101,23 @@ export class ReturnValue implements ReturnValue {
         }
 
         return "";
+    }
+}
+
+export interface Error extends Object {
+    message: string;
+}
+
+export class Error implements Error {
+    constructor(message: string) {
+        this.message = message;
+    }
+
+    Type(): ObjectType {
+        return ObjectKind.ERROR_OBJ;
+    }
+
+    Inspect(): string {
+        return `ERROR: ${this.message}`;
     }
 }

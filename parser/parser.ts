@@ -14,6 +14,7 @@ import {
     Program,
     ReturnStatement,
     Statement,
+    StringLiteral,
 } from "../ast/ast.ts";
 import { Lexer } from "../lexer/lexer.ts";
 import { Token, TokenType } from "../token/token.ts";
@@ -50,6 +51,7 @@ export function New(lexer: Lexer): Parser {
     // p.registerPrefix(TokenType.IDENT, () => p.parseIdentifier());
     p.registerPrefix(TokenType.IDENT, p.parseIdentifier.bind(p));
     p.registerPrefix(TokenType.INT, p.parseIntgerLiteral.bind(p));
+    p.registerPrefix(TokenType.STRING, p.parseStringLiteral.bind(p));
     p.registerPrefix(TokenType.BANG, p.parsePrefixExpression.bind(p));
     p.registerPrefix(TokenType.MINUS, p.parsePrefixExpression.bind(p));
     p.registerPrefix(TokenType.TRUE, p.parseBooleanLiteral.bind(p));
@@ -246,6 +248,10 @@ export class Parser {
         lit.value = value;
 
         return lit;
+    }
+
+    parseStringLiteral(): Expression {
+        return new StringLiteral(this.curToken, this.curToken.literal);
     }
 
     parsePrefixExpression(): Expression {

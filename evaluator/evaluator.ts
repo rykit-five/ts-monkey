@@ -8,6 +8,7 @@ import {
     Node,
     PrefixExpression,
     Program,
+    ReturnStatement,
     Statement,
 } from "../ast/ast.ts";
 import {
@@ -16,6 +17,7 @@ import {
     Null,
     Object,
     ObjectKind,
+    ReturnValue,
 } from "../object/object.ts";
 
 export const NULL = new Null();
@@ -24,9 +26,14 @@ export const FALSE = new Boolean(false);
 
 export function evaluate(node: Node | null): Object | null {
     if (IsProgram(node)) {
-        return evaluateStatements(node.statements);
+        return evaluateProgram(node.statements);
     } else if (IsExpressionStatement(node)) {
         return evaluate(node.expression);
+    } else if (IsReturnStatement(node)) {
+        const val = evaluate(node.returnValue);
+        return new ReturnValue(val);
+    } else if (IsBlockStatement(node)) {
+        return evaluateBlockStatement(node);
     } else if (IsIntegerLiteral(node)) {
         return new Integer(node.value);
     } else if (IsBooleanLiteral(node)) {
@@ -38,8 +45,6 @@ export function evaluate(node: Node | null): Object | null {
         const left = evaluate(node.left);
         const right = evaluate(node.right);
         return evaluateInfixExpression(node.operator, left, right);
-    } else if (IsBlockStatement(node)) {
-        return evaluateStatements(node.statements);
     } else if (IsIfExpression(node)) {
         return evaluateIfExpression(node);
     }
@@ -47,12 +52,30 @@ export function evaluate(node: Node | null): Object | null {
     return null;
 }
 
-function evaluateStatements(stmts: Statement[]): Object | null {
-    let result: Object | null = new Null();
+function evaluateProgram(stmts: Statement[]): Object | null {
+    let result: Object | null = null;
 
-    stmts.forEach((statement) => {
-        result = evaluate(statement);
-    });
+    for (let i = 0; i < stmts.length; i++) {
+        result = evaluate(stmts[i]);
+
+        if (result instanceof ReturnValue) {
+            return result.value;
+        }
+    }
+
+    return result;
+}
+
+function evaluateBlockStatement(block: BlockStatement): Object | null {
+    let result: Object | null = null;
+
+    for (let i = 0; i < block.statements.length; i++) {
+        result = evaluate(block.statements[i]);
+
+        if (result != null && result.Type() == ObjectKind.RETURN_VALUE_OBJ) {
+            return result;
+        }
+    }
 
     return result;
 }
@@ -197,6 +220,10 @@ function IsProgram(n: Node | null): n is Program {
 
 function IsExpressionStatement(n: Node | null): n is ExpressionStatement {
     return n instanceof ExpressionStatement;
+}
+
+function IsReturnStatement(n: Node | null): n is ReturnStatement {
+    return n instanceof ReturnStatement;
 }
 
 function IsIntegerLiteral(n: Node | null): n is IntegerLiteral {

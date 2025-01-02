@@ -4,6 +4,7 @@ export enum ObjectKind {
     NULL_OBJ = "NULL",
     INTEGER_OBJ = "INTEGER",
     BOOLEAN_OBJ = "BOOLEAN",
+    RETURN_VALUE_OBJ = "RETURN_VALUE",
 }
 
 export interface Object {
@@ -56,5 +57,27 @@ export class Boolean implements Boolean {
 
     Inspect(): string {
         return `${this.value}`;
+    }
+}
+
+export interface ReturnValue extends Object {
+    value: Object | null;
+}
+
+export class ReturnValue implements ReturnValue {
+    constructor(value: Object | null) {
+        this.value = value;
+    }
+
+    Type(): ObjectType {
+        return ObjectKind.RETURN_VALUE_OBJ;
+    }
+
+    Inspect(): string {
+        if (this.value != null) {
+            return this.value.Inspect();
+        }
+
+        return "";
     }
 }

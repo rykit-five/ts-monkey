@@ -114,7 +114,37 @@ Deno.test("TestIfElseExpressions", () => {
             assert(testNullObject(evaluated));
         }
     });
+});
 
+Deno.test("TestReturnStatements", () => {
+    type Test = {
+        input: string;
+        expected: number;
+    };
+
+    const tests: Test[] = [
+        { input: "return 10;\\0", expected: 10 },
+        { input: "return 10; 9;\\0", expected: 10 },
+        { input: "return 2 * 5; 9;\\0", expected: 10 },
+        { input: "9; return 2 * 5; 9;\\0", expected: 10 },
+        {
+            input: `
+if (10 > 1) {
+  if (10 > 1) {
+    return 10;
+  }
+
+  return 1;
+}
+\\0`,
+            expected: 10,
+        },
+    ];
+
+    tests.forEach((tt) => {
+        const evaluated = testEval(tt.input);
+        assert(testIntegerObject(evaluated, tt.expected));
+    });
 });
 
 function testEval(input: string): Object | null {

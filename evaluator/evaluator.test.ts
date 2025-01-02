@@ -1,6 +1,13 @@
 import { assert, assertEquals } from "jsr:@std/assert";
 import { Lexer } from "../lexer/lexer.ts";
-import { NewEnvironment, Boolean, Error, Integer, Object } from "../object/object.ts";
+import {
+    Boolean,
+    Error,
+    Function,
+    Integer,
+    NewEnvironment,
+    Object,
+} from "../object/object.ts";
 import { New } from "../parser/parser.ts";
 import { evaluate, NULL } from "./evaluator.ts";
 
@@ -199,9 +206,9 @@ if (10 > 1) {
             expectedMessage: "unknown operator: BOOLEAN + BOOLEAN",
         },
         {
-			input: "foobar\\0",
-			expectedMessage: "identifier not found: foobar",
-		},
+            input: "foobar\\0",
+            expectedMessage: "identifier not found: foobar",
+        },
     ];
 
     tests.forEach((tt, i) => {
@@ -228,10 +235,73 @@ Deno.test("TestLetStatements", () => {
     };
 
     const tests: Test[] = [
-        {input: "let a = 5; a;\\0", expected: 5},
-		{input: "let a = 5 * 5; a;\\0", expected: 25},
-		{input: "let a = 5; let b = a; b;\\0", expected: 5},
-		{input: "let a = 5; let b = a; let c = a + b + 5; c;\\0", expected: 15},
+        { input: "let a = 5; a;\\0", expected: 5 },
+        { input: "let a = 5 * 5; a;\\0", expected: 25 },
+        { input: "let a = 5; let b = a; b;\\0", expected: 5 },
+        {
+            input: "let a = 5; let b = a; let c = a + b + 5; c;\\0",
+            expected: 15,
+        },
+    ];
+
+    tests.forEach((tt) => {
+        const evaluated = testEval(tt.input);
+        assert(testIntegerObject(evaluated, tt.expected));
+    });
+});
+
+Deno.test("TestFunctionObject", () => {
+    const input = "fn(x) { x + 2; };\\0";
+
+    const evaluated = testEval(input);
+    assert(
+        IsFunction(evaluated),
+        `object is not function. got=${typeof evaluated}`,
+    );
+    const fn = evaluated;
+
+    if (fn?.parameters != null) {
+        assertEquals(
+            fn?.parameters.length,
+            1,
+            `function has wrong parameters. got=${fn?.parameters}`,
+        );
+
+        assertEquals(
+            fn?.parameters[0].String(),
+            "x",
+            `parameter is not 'x'. got=${fn.parameters[0]}`,
+        );
+    }
+
+    const expectedBody = "(x + 2)";
+
+    assertEquals(
+        fn?.body.String(),
+        expectedBody,
+        `body is not ${expectedBody}. got=${fn?.body.String()}`,
+    );
+});
+
+Deno.test("TestFunctionApplication", () => {
+    type Test = {
+        input: string;
+        expected: number;
+    };
+
+    const tests: Test[] = [
+        { input: "let identity = fn(x) { x; }; identity(5);\\0", expected: 5 },
+        {
+            input: "let identity = fn(x) { return x; }; identity(5);\\0",
+            expected: 5,
+        },
+        { input: "let double = fn(x) { x * 2; }; double(5);\\0", expected: 10 },
+        { input: "let add = fn(x, y) { x + y; }; add(5, 5);\\0", expected: 10 },
+        {
+            input: "let add = fn(x, y) { x + y; }; add(5 + 5, add(5, 5));\\0",
+            expected: 20,
+        },
+        { input: "fn(x) { x; }(5)\\0", expected: 5 },
     ];
 
     tests.forEach((tt) => {
@@ -296,6 +366,10 @@ function IsInteger(o: Object | null): o is Integer {
 
 function IsBoolean(o: Object | null): o is Boolean {
     return o instanceof Boolean;
+}
+
+function IsFunction(o: Object | null): o is Function {
+    return o instanceof Function;
 }
 
 function IsError(o: Object | null): o is Error {

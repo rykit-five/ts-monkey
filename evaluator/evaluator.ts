@@ -1,7 +1,10 @@
 import {
     BlockStatement,
     BooleanLiteral,
+    CallExpression,
+    Expression,
     ExpressionStatement,
+    FunctionLiteral,
     Identifier,
     IfExpression,
     InfixExpression,
@@ -18,7 +21,9 @@ import {
     Boolean,
     Environment,
     Error,
+    Function,
     Integer,
+    NewEnclosedEnvironment,
     Null,
     Object,
     ObjectKind,
@@ -47,6 +52,10 @@ export function evaluate(node: Node | null, env: Environment): Object | null {
             return val;
         }
         return new ReturnValue(val);
+    } else if (IsFunctionLiteral(node)) {
+        const params = node.parameters;
+        const body = node.body;
+        return new Function(params, body, env);
     } else if (IsBlockStatement(node)) {
         return evaluateBlockStatement(node, env);
     } else if (IsIdentifier(node)) {
@@ -75,6 +84,16 @@ export function evaluate(node: Node | null, env: Environment): Object | null {
         return evaluateInfixExpression(node.operator, left, right);
     } else if (IsIfExpression(node)) {
         return evaluateIfExpression(node, env);
+    } else if (IsCallExpression(node)) {
+        const func = evaluate(node.func, env);
+        if (isError(func)) {
+            return func;
+        }
+        const args = evaluateExpressions(node.arguments, env);
+        if (args.length == 1 && isError(args[0])) {
+            return args[0];
+        }
+        return applyFunction(func, args);
     }
 
     return null;
@@ -96,7 +115,10 @@ function evaluateProgram(stmts: Statement[], env: Environment): Object | null {
     return result;
 }
 
-function evaluateBlockStatement(block: BlockStatement, env: Environment): Object | null {
+function evaluateBlockStatement(
+    block: BlockStatement,
+    env: Environment,
+): Object | null {
     let result: Object | null = null;
 
     for (let i = 0; i < block.statements.length; i++) {
@@ -108,6 +130,27 @@ function evaluateBlockStatement(block: BlockStatement, env: Environment): Object
                 return result;
             }
         }
+    }
+
+    return result;
+}
+
+function evaluateExpressions(
+    exps: (Expression | null)[] | null,
+    env: Environment,
+): (Object | null)[] {
+    const result: (Object | null)[] = [];
+
+    if (exps == null) {
+        return result;
+    }
+
+    for (let i = 0; i < exps.length; i++) {
+        const evaluated = evaluate(exps[i], env);
+        if (isError(evaluated)) {
+            return [evaluated];
+        }
+        result.push(evaluated);
     }
 
     return result;
@@ -231,7 +274,10 @@ function evaluateIntegerInfixExpression(
     }
 }
 
-function evaluateIfExpression(ie: IfExpression, env: Environment): Object | null {
+function evaluateIfExpression(
+    ie: IfExpression,
+    env: Environment,
+): Object | null {
     const condition = evaluate(ie.condition, env);
     if (isError(condition)) {
         return condition;
@@ -252,6 +298,41 @@ function nativeBoolToBooleanObject(input: boolean): Object {
     } else {
         return FALSE;
     }
+}
+
+function applyFunction(
+    fn: Object | null,
+    args: (Object | null)[],
+): Object | null {
+    if (!(fn instanceof Function)) {
+        return newError(`not a function: ${fn?.Type()}`);
+    }
+
+    const extendedEnv = extendFunctionEnv(fn, args);
+    const evaluated = evaluate(fn.body, extendedEnv);
+    return unwrapReturnValue(evaluated);
+}
+
+function extendFunctionEnv(fn: Function, args: (Object | null)[]): Environment {
+    const env = NewEnclosedEnvironment(fn.env);
+
+    if (fn.parameters == null) {
+        return env;
+    }
+
+    for (let i = 0; i < fn.parameters.length; i++) {
+        env.Set(fn.parameters[i].value, args[i]);
+    }
+
+    return env;
+}
+
+function unwrapReturnValue(obj: Object | null): Object | null {
+    if (obj instanceof ReturnValue) {
+        return obj.value;
+    }
+
+    return obj;
 }
 
 function isTruthy(obj: Object | null): boolean {
@@ -294,6 +375,10 @@ function IsReturnStatement(n: Node | null): n is ReturnStatement {
     return n instanceof ReturnStatement;
 }
 
+function IsFunctionLiteral(n: Node | null): n is FunctionLiteral {
+    return n instanceof FunctionLiteral;
+}
+
 function IsIdentifier(n: Node | null): n is Identifier {
     return n instanceof Identifier;
 }
@@ -324,4 +409,8 @@ function IsBlockStatement(n: Node | null): n is BlockStatement {
 
 function IsIfExpression(n: Node | null): n is IfExpression {
     return n instanceof IfExpression;
+}
+
+function IsCallExpression(n: Node | null): n is CallExpression {
+    return n instanceof CallExpression;
 }

@@ -106,7 +106,7 @@ export class Parser {
     parseProgram(): Program {
         const program = new Program();
 
-        while (this.curToken.type != TokenType.TERMINAL) {
+        while (this.curToken.type != TokenType.EOF) {
             const stmt = this.parseStatement();
             if (stmt != null) {
                 program.statements.push(stmt);
@@ -187,8 +187,7 @@ export class Parser {
         // TODO: !this.curTokenIs(TokenType.TERMINAL) -> !this.curTokenIs(TokenType.EOF)
         while (
             !this.curTokenIs(TokenType.RBRACE) &&
-            !(this.curTokenIs(TokenType.EOF) ||
-                this.curTokenIs(TokenType.TERMINAL))
+            !(this.curTokenIs(TokenType.EOF))
         ) {
             const stmt = this.parseStatement();
             if (stmt != null) {

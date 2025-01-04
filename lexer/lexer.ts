@@ -49,7 +49,7 @@ export class Lexer {
             case "\\":
                 if (this.PeekChar() == "0") {
                     tok = new Token(
-                        TokenType.TERMINAL,
+                        TokenType.EOF,
                         this.MakeTwoCharToken(),
                     );
                 } else {
@@ -94,9 +94,6 @@ export class Lexer {
                 break;
             case "]":
                 tok = new Token(TokenType.RBRACKET, this.ch);
-                break;
-            case "0":
-                tok = new Token(TokenType.EOF, "");
                 break;
             default:
                 if (IsLetter(this.ch)) {

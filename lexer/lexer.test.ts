@@ -128,7 +128,6 @@ if (5 < 10) {
         new Test(TokenType.COLON, ":"),
         new Test(TokenType.STRING, "bar"),
         new Test(TokenType.RBRACE, "}"),
-        new Test(TokenType.TERMINAL, "\\0"),
     ];
 
     const l = new Lexer(input);

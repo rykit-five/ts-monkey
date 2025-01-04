@@ -1,5 +1,10 @@
 import { start } from "./repl/repl.ts";
 
-console.log("Hello, This is the tsmonkey programming language!");
-console.log("Feel free to type in commands");
+const encoder = new TextEncoder();
+
+Deno.stdout.write(
+    encoder.encode("Hello, This is the tsmonkey programming language!\n"),
+);
+Deno.stdout.write(encoder.encode("Feel free to type in commands\n"));
+
 start();

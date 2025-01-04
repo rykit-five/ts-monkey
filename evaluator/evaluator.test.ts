@@ -18,22 +18,22 @@ Deno.test("TestEvalIntegerExpression", () => {
     };
 
     const tests: Test[] = [
-        { input: "5\\0", expected: 5 },
-        { input: "10\\0", expected: 10 },
-        { input: "-5\\0", expected: -5 },
-        { input: "-10\\0", expected: -10 },
-        { input: "1 + 2 + 3 + 4 + 5\\0", expected: 15 },
-        { input: "5 + 5 + 5 + 5 - 10\\0", expected: 10 },
-        { input: "2 * 2 * 2 * 2 * 2\\0", expected: 32 },
-        { input: "-50 + 100 + -50\\0", expected: 0 },
-        { input: "5 * 2 + 10\\0", expected: 20 },
-        { input: "5 + 2 * 10\\0", expected: 25 },
-        { input: "20 + 2 * -10\\0", expected: 0 },
-        { input: "50 / 2 * 2 + 10\\0", expected: 60 },
-        { input: "2 * (5 + 10)\\0", expected: 30 },
-        { input: "3 * 3 * 3 + 10\\0", expected: 37 },
-        { input: "3 * (3 * 3) + 10\\0", expected: 37 },
-        { input: "(5 + 10 * 2 + 15 / 3) * 2 + -10\\0", expected: 50 },
+        { input: "5", expected: 5 },
+        { input: "10", expected: 10 },
+        { input: "-5", expected: -5 },
+        { input: "-10", expected: -10 },
+        { input: "1 + 2 + 3 + 4 + 5", expected: 15 },
+        { input: "5 + 5 + 5 + 5 - 10", expected: 10 },
+        { input: "2 * 2 * 2 * 2 * 2", expected: 32 },
+        { input: "-50 + 100 + -50", expected: 0 },
+        { input: "5 * 2 + 10", expected: 20 },
+        { input: "5 + 2 * 10", expected: 25 },
+        { input: "20 + 2 * -10", expected: 0 },
+        { input: "50 / 2 * 2 + 10", expected: 60 },
+        { input: "2 * (5 + 10)", expected: 30 },
+        { input: "3 * 3 * 3 + 10", expected: 37 },
+        { input: "3 * (3 * 3) + 10", expected: 37 },
+        { input: "(5 + 10 * 2 + 15 / 3) * 2 + -10", expected: 50 },
     ];
 
     tests.forEach((tt) => {
@@ -49,25 +49,25 @@ Deno.test("TestEvalBooleanExpression", () => {
     };
 
     const tests: Test[] = [
-        { input: "true\\0", expected: true },
-        { input: "false\\0", expected: false },
-        { input: "1 < 2\\0", expected: true },
-        { input: "1 > 2\\0", expected: false },
-        { input: "1 < 1\\0", expected: false },
-        { input: "1 > 1\\0", expected: false },
-        { input: "1 == 1\\0", expected: true },
-        { input: "1 != 1\\0", expected: false },
-        { input: "1 == 2\\0", expected: false },
-        { input: "1 != 2\\0", expected: true },
-        { input: "true == true\\0", expected: true },
-        { input: "false == false\\0", expected: true },
-        { input: "true == false\\0", expected: false },
-        { input: "true != false\\0", expected: true },
-        { input: "false != true\\0", expected: true },
-        { input: "(1 < 2) == true\\0", expected: true },
-        { input: "(1 < 2) == false\\0", expected: false },
-        { input: "(1 > 2) == true\\0", expected: false },
-        { input: "(1 > 2) == false\\0", expected: true },
+        { input: "true", expected: true },
+        { input: "false", expected: false },
+        { input: "1 < 2", expected: true },
+        { input: "1 > 2", expected: false },
+        { input: "1 < 1", expected: false },
+        { input: "1 > 1", expected: false },
+        { input: "1 == 1", expected: true },
+        { input: "1 != 1", expected: false },
+        { input: "1 == 2", expected: false },
+        { input: "1 != 2", expected: true },
+        { input: "true == true", expected: true },
+        { input: "false == false", expected: true },
+        { input: "true == false", expected: false },
+        { input: "true != false", expected: true },
+        { input: "false != true", expected: true },
+        { input: "(1 < 2) == true", expected: true },
+        { input: "(1 < 2) == false", expected: false },
+        { input: "(1 > 2) == true", expected: false },
+        { input: "(1 > 2) == false", expected: true },
     ];
 
     tests.forEach((tt) => {
@@ -83,12 +83,12 @@ Deno.test("TestEvalBooleanExpression", () => {
     };
 
     const tests: Test[] = [
-        { input: "!true\\0", expected: false },
-        { input: "!false\\0", expected: true },
-        { input: "!5\\0", expected: false },
-        { input: "!!true\\0", expected: true },
-        { input: "!!false\\0", expected: false },
-        { input: "!!5\\0", expected: true },
+        { input: "!true", expected: false },
+        { input: "!false", expected: true },
+        { input: "!5", expected: false },
+        { input: "!!true", expected: true },
+        { input: "!!false", expected: false },
+        { input: "!!5", expected: true },
     ];
 
     tests.forEach((tt) => {
@@ -104,13 +104,13 @@ Deno.test("TestIfElseExpressions", () => {
     };
 
     const tests: Test[] = [
-        { input: "if (true) { 10 }\\0", expected: 10 },
-        { input: "if (false) { 10 }\\0", expected: null },
-        { input: "if (1) { 10 }\\0", expected: 10 },
-        { input: "if (1 < 2) { 10 }\\0", expected: 10 },
-        { input: "if (1 > 2) { 10 }\\0", expected: null },
-        { input: "if (1 > 2) { 10 } else { 20 }\\0", expected: 20 },
-        { input: "if (1 < 2) { 10 } else { 20 }\\0", expected: 10 },
+        { input: "if (true) { 10 }", expected: 10 },
+        { input: "if (false) { 10 }", expected: null },
+        { input: "if (1) { 10 }", expected: 10 },
+        { input: "if (1 < 2) { 10 }", expected: 10 },
+        { input: "if (1 > 2) { 10 }", expected: null },
+        { input: "if (1 > 2) { 10 } else { 20 }", expected: 20 },
+        { input: "if (1 < 2) { 10 } else { 20 }", expected: 10 },
     ];
 
     tests.forEach((tt) => {
@@ -130,10 +130,10 @@ Deno.test("TestReturnStatements", () => {
     };
 
     const tests: Test[] = [
-        { input: "return 10;\\0", expected: 10 },
-        { input: "return 10; 9;\\0", expected: 10 },
-        { input: "return 2 * 5; 9;\\0", expected: 10 },
-        { input: "9; return 2 * 5; 9;\\0", expected: 10 },
+        { input: "return 10;", expected: 10 },
+        { input: "return 10; 9;", expected: 10 },
+        { input: "return 2 * 5; 9;", expected: 10 },
+        { input: "9; return 2 * 5; 9;", expected: 10 },
         {
             input: `
 if (10 > 1) {
@@ -143,7 +143,7 @@ if (10 > 1) {
 
   return 1;
 }
-\\0`,
+`,
             expected: 10,
         },
     ];
@@ -162,35 +162,35 @@ Deno.test("TestErrorHandling", () => {
 
     const tests: Test[] = [
         {
-            input: "5 + true;\\0",
+            input: "5 + true;",
             expectedMessage: "type mismatch: INTEGER + BOOLEAN",
         },
         {
-            input: "5 + true; 5;\\0",
+            input: "5 + true; 5;",
             expectedMessage: "type mismatch: INTEGER + BOOLEAN",
         },
         {
-            input: "-true\\0",
+            input: "-true",
             expectedMessage: "unknown operator: -BOOLEAN",
         },
         {
-            input: "true + false;\\0",
+            input: "true + false;",
             expectedMessage: "unknown operator: BOOLEAN + BOOLEAN",
         },
         {
-            input: "true + false + true + false;\\0",
+            input: "true + false + true + false;",
             expectedMessage: "unknown operator: BOOLEAN + BOOLEAN",
         },
         {
-            input: "5; true + false; 5\\0",
+            input: "5; true + false; 5",
             expectedMessage: "unknown operator: BOOLEAN + BOOLEAN",
         },
         {
-            input: `"Hello" - "World"\\0`,
+            input: `"Hello" - "World"`,
             expectedMessage: "unknown operator: STRING - STRING",
         },
         {
-            input: "if (10 > 1) { true + false; }\\0",
+            input: "if (10 > 1) { true + false; }",
             expectedMessage: "unknown operator: BOOLEAN + BOOLEAN",
         },
         {
@@ -202,11 +202,11 @@ if (10 > 1) {
 
   return 1;
 }
-\\0`,
+`,
             expectedMessage: "unknown operator: BOOLEAN + BOOLEAN",
         },
         {
-            input: "foobar\\0",
+            input: "foobar",
             expectedMessage: "identifier not found: foobar",
         },
     ];
@@ -235,11 +235,11 @@ Deno.test("TestLetStatements", () => {
     };
 
     const tests: Test[] = [
-        { input: "let a = 5; a;\\0", expected: 5 },
-        { input: "let a = 5 * 5; a;\\0", expected: 25 },
-        { input: "let a = 5; let b = a; b;\\0", expected: 5 },
+        { input: "let a = 5; a;", expected: 5 },
+        { input: "let a = 5 * 5; a;", expected: 25 },
+        { input: "let a = 5; let b = a; b;", expected: 5 },
         {
-            input: "let a = 5; let b = a; let c = a + b + 5; c;\\0",
+            input: "let a = 5; let b = a; let c = a + b + 5; c;",
             expected: 15,
         },
     ];
@@ -251,7 +251,7 @@ Deno.test("TestLetStatements", () => {
 });
 
 Deno.test("TestFunctionObject", () => {
-    const input = "fn(x) { x + 2; };\\0";
+    const input = "fn(x) { x + 2; };";
 
     const evaluated = testEval(input);
     assert(
@@ -290,18 +290,18 @@ Deno.test("TestFunctionApplication", () => {
     };
 
     const tests: Test[] = [
-        { input: "let identity = fn(x) { x; }; identity(5);\\0", expected: 5 },
+        { input: "let identity = fn(x) { x; }; identity(5);", expected: 5 },
         {
-            input: "let identity = fn(x) { return x; }; identity(5);\\0",
+            input: "let identity = fn(x) { return x; }; identity(5);",
             expected: 5,
         },
-        { input: "let double = fn(x) { x * 2; }; double(5);\\0", expected: 10 },
-        { input: "let add = fn(x, y) { x + y; }; add(5, 5);\\0", expected: 10 },
+        { input: "let double = fn(x) { x * 2; }; double(5);", expected: 10 },
+        { input: "let add = fn(x, y) { x + y; }; add(5, 5);", expected: 10 },
         {
-            input: "let add = fn(x, y) { x + y; }; add(5 + 5, add(5, 5));\\0",
+            input: "let add = fn(x, y) { x + y; }; add(5 + 5, add(5, 5));",
             expected: 20,
         },
-        { input: "fn(x) { x; }(5)\\0", expected: 5 },
+        { input: "fn(x) { x; }(5)", expected: 5 },
     ];
 
     tests.forEach((tt) => {
@@ -311,7 +311,7 @@ Deno.test("TestFunctionApplication", () => {
 });
 
 function testEval(input: string): Object | null {
-    const l = new Lexer(input);
+    const l = new Lexer(input + "\\0");
     const p = New(l);
     const program = p.parseProgram();
     const env = NewEnvironment();

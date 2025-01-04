@@ -22,8 +22,6 @@ export enum TokenType {
     EQ = "==",
     NOT_EQ = "!=",
 
-    TERMINAL = "\\0",
-
     // Delimiters
     COMMA = ",",
     SEMICOLON = ",",

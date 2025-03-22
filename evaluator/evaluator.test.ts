@@ -310,6 +310,22 @@ Deno.test("TestFunctionApplication", () => {
     });
 });
 
+Deno.test("TestAssignExpression", () => {
+    type Test = {
+        input: string;
+        expected: number;
+    };
+
+    const tests: Test[] = [
+        { input: "let x = 0; x = 100; x;", expected: 100 },
+    ];
+
+    tests.forEach((tt) => {
+        const evaluated = testEval(tt.input);
+        assert(testIntegerObject(evaluated, tt.expected));
+    });
+});
+
 function testEval(input: string): Object | null {
     const l = new Lexer(input + "\\0");
     const p = New(l);

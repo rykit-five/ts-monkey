@@ -24,11 +24,12 @@ type infixParseFn = (left: Expression | null) => Expression;
 
 enum Precedence {
     LOWEST = 1,
+    ASSIGN,
     EQUALS,
     LESSGREATER,
     SUM,
     PRODUCT,
-    PREFIXINFIX,
+    PREFIX,
     CALL,
 }
 
@@ -42,7 +43,7 @@ const precedences = new Map([
     [TokenType.SLASH, Precedence.PRODUCT],
     [TokenType.ASTERISK, Precedence.PRODUCT],
     [TokenType.LPAREN, Precedence.CALL],
-    [TokenType.ASSIGN, Precedence.PREFIXINFIX],
+    [TokenType.ASSIGN, Precedence.ASSIGN],
 ]);
 
 export function New(lexer: Lexer): Parser {
@@ -263,7 +264,7 @@ export class Parser {
 
         this.nextToken();
 
-        expression.right = this.parseExpression(Precedence.PREFIXINFIX);
+        expression.right = this.parseExpression(Precedence.PREFIX);
 
         return expression;
     }

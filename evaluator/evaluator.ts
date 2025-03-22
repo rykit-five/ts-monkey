@@ -73,15 +73,7 @@ export function evaluate(node: Node | null, env: Environment): Object | null {
         }
         return evaluatePrefixExpression(node.operator, right);
     } else if (IsInfixExpression(node)) {
-        const left = evaluate(node.left, env);
-        if (isError(left)) {
-            return left;
-        }
-        const right = evaluate(node.right, env);
-        if (isError(right)) {
-            return right;
-        }
-        return evaluateInfixExpression(node.operator, left, right);
+        return evaluatePreInfixExpression(node, env);
     } else if (IsIfExpression(node)) {
         return evaluateIfExpression(node, env);
     } else if (IsCallExpression(node)) {
@@ -203,6 +195,37 @@ function evaluateMinusOperatorExpression(right: Object | null): Object {
     }
     // ここに到達することはないが、型システム的に保証するための例外
     return NULL;
+}
+
+function evaluatePreInfixExpression(
+    node: InfixExpression,
+    env: Environment,
+): Object | null {
+    if (node.operator == "=") {
+        const val = evaluate(node.right, env);
+        if (isError(val)) {
+            return val;
+        }
+        if (!IsIdentifier(node.left)) {
+            return null;
+        }
+        const ok = env.Update(node.left.value, val);
+        if (!ok) {
+            return newError(`identifier not found: ${node.left.value}`);
+        }
+    } else {
+        const left = evaluate(node.left, env);
+        if (isError(left)) {
+            return left;
+        }
+        const right = evaluate(node.right, env);
+        if (isError(right)) {
+            return right;
+        }
+        return evaluateInfixExpression(node.operator, left, right);
+    }
+
+    return null;
 }
 
 function evaluateInfixExpression(

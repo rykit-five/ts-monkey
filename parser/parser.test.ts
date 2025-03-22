@@ -758,8 +758,7 @@ Deno.test("TestAssignExpressionParsing", () => {
     const input = `
 let x = 0;
 x = 100;
-\\0`
-    ;
+\\0`;
 
     const l = new Lexer(input);
     const p = New(l);

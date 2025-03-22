@@ -61,6 +61,22 @@ export class Environment implements Environment {
         }
         return null;
     }
+
+    Update(name: string, val: Object | null): boolean {
+        let [_, ok] = this.Get(name);
+        if (!ok) {
+            return ok;
+        }
+
+        const obj = this.Set(name, val);
+        if (obj == null) {
+            ok = false;
+        } else {
+            ok = true;
+        }
+
+        return ok;
+    }
 }
 
 export interface Object {

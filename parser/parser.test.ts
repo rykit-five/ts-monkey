@@ -754,6 +754,44 @@ Deno.test("TestCallExpressionParsing", () => {
     }
 });
 
+Deno.test("TestAssignExpressionParsing", () => {
+    const input = `
+let x = 0;
+x = 100;
+\\0`
+    ;
+
+    const l = new Lexer(input);
+    const p = New(l);
+
+    const program = p.parseProgram();
+    CheckParseErrors(p);
+
+    assertEquals(
+        program.statements.length,
+        2,
+        `Program.statements does not contain 2 statements. got=${program.statements.length}`,
+    );
+
+    // program.statements[0]
+    let stmt = program.statements[0];
+    assert(TestLetStatement(stmt, "x"));
+    assert(
+        IsLetStatement(stmt),
+        `stmt is not LetStatement. got=${typeof stmt}`,
+    );
+    const val = stmt.value;
+    assert(TestLiteralExpression(val, 0));
+
+    // program.statements[1]
+    stmt = program.statements[1];
+    assert(
+        IsExpressionStatement(stmt),
+        `program.statements[1] not ExpressionStatement. got=${typeof stmt}`,
+    );
+    assert(TestInfixExpression(stmt.expression, "x", "=", 100));
+});
+
 function CheckParseErrors(p: Parser): void {
     const errors = p.Errors();
     if (errors.length == 0) {

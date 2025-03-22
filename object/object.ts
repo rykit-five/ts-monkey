@@ -15,15 +15,15 @@ export enum ObjectKind {
     RETURN_VALUE_OBJ = "RETURN_VALUE",
 }
 
+export function NewEnvironment(): Environment {
+    const s = new Map<string, Object>([]);
+    return new Environment(s, null);
+}
+
 export function NewEnclosedEnvironment(outer: Environment): Environment {
     const env = NewEnvironment();
     env.outer = outer;
     return env;
-}
-
-export function NewEnvironment(): Environment {
-    const s = new Map<string, Object>([]);
-    return new Environment(s, null);
 }
 
 export interface Environment {

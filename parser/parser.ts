@@ -28,7 +28,7 @@ enum Precedence {
     LESSGREATER,
     SUM,
     PRODUCT,
-    PREFIX,
+    PREFIXINFIX,
     CALL,
 }
 
@@ -42,6 +42,7 @@ const precedences = new Map([
     [TokenType.SLASH, Precedence.PRODUCT],
     [TokenType.ASTERISK, Precedence.PRODUCT],
     [TokenType.LPAREN, Precedence.CALL],
+    [TokenType.ASSIGN, Precedence.PREFIXINFIX],
 ]);
 
 export function New(lexer: Lexer): Parser {
@@ -69,6 +70,7 @@ export function New(lexer: Lexer): Parser {
     p.registerInfix(TokenType.LT, p.parseInfixExpression.bind(p));
     p.registerInfix(TokenType.GT, p.parseInfixExpression.bind(p));
     p.registerInfix(TokenType.LPAREN, p.parseCallExpression.bind(p));
+    p.registerInfix(TokenType.ASSIGN, p.parseInfixExpression.bind(p));
 
     return p;
 }
@@ -261,7 +263,7 @@ export class Parser {
 
         this.nextToken();
 
-        expression.right = this.parseExpression(Precedence.PREFIX);
+        expression.right = this.parseExpression(Precedence.PREFIXINFIX);
 
         return expression;
     }

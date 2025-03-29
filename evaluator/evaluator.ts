@@ -238,6 +238,12 @@ function evaluateInfixExpression(
         right?.Type() == ObjectKind.INTEGER_OBJ
     ) {
         return evaluateIntegerInfixExpression(operator, left, right);
+    } else if (
+        left?.Type() == ObjectKind.STRING_OBJ &&
+        right?.Type() == ObjectKind.STRING_OBJ &&
+        operator == "+"
+    ) {
+        return evaluateStringInfixExpression(operator, left, right);
     } else if (operator == "==") {
         return nativeBoolToBooleanObject(left == right);
     } else if (operator == "!=") {
@@ -251,6 +257,35 @@ function evaluateInfixExpression(
             `unknown operator: ${left?.Type()} ${operator} ${right?.Type()}`,
         );
     }
+}
+
+function evaluateStringInfixExpression(
+    operator: string,
+    left: Object | null,
+    right: Object | null,
+): Object {
+    if (operator != "+") {
+        return newError(
+            `unknown operator: ${left?.Type()} ${operator} ${right?.Type()}`,
+        );
+    }
+
+    let leftVal = "";
+    let rightVal = "";
+
+    if (left instanceof String) {
+        leftVal = left.value;
+    } else {
+        return NULL;
+    }
+
+    if (right instanceof String) {
+        rightVal = right.value;
+    } else {
+        return NULL;
+    }
+
+    return new String(leftVal + rightVal);
 }
 
 function evaluateIntegerInfixExpression(
